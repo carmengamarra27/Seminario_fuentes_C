@@ -1,0 +1,101 @@
+---
+title: "Seminario_C"
+output: html_notebook
+---
+
+Prueba inicial de las tablas de biodiversidad en un notebook 
+
+Primero, instalar los paquetes
+```{r}
+install.packages(tidyverse)
+install.packages(rgbif)
+```
+
+Importamos los paquetes
+```{r}
+library(tidyverse)
+library(rgbif)
+```
+
+Utilizamos rgbif para coger los datos
+```{r}
+prueba <- occ_data(
+  country = "ES",
+  year = "2015",
+  stateProvince = "Mu",
+  limit = 600
+)
+
+prueba$data   # Si no lo pones así ($), te da dos opciones: tabla y solo número de registros
+```
+
+Hay que estandarizar el formato de las provincias
+```{r}
+# Nombres estandarizados de las provincias
+provincias_std <- c("Álava", "Albacete", "Alicante", "Almería", "Asturias", "Ávila", "Badajoz", "Barcelona", "Burgos", "Cáceres", "Cádiz", 
+                    "Cantabria", "Castellón", "Ceuta", "Ciudad Real", "Córdoba", "La Coruña", "Cuenca", "Gerona", "Granada", "Guadalajara", 
+                    "Guipúzcoa", "Huelva", "Huesca", "Islas Baleares", "Islas Canarias","Jaén", "León", "Lléida", "Lugo", "Madrid", "Málaga", 
+                    "Melilla", "Murcia", "Navarra", "Orense", "Palencia","Pontevedra", "La Rioja", "Salamanca", "Segovia", "Sevilla", "Soria",
+                    "Tarragona", "Teruel", "Toledo", "Valencia", "Valladolid", "Vizcaya", "Zamora", "Zaragoza")
+
+# Vectores con las variantes posibles de cada provincia
+variantes <- list(c("Álava", "Araba", "Alava", "Araba/Álava", "", ""),
+                  c("Albacete", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Alicante", "A", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Almería", "Al", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Asturias", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Ávila", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Badajoz", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Barcelona", "B", "Barcelonès", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Burgos", "Bu", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Cáceres", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Cádiz", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Cantabria", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Castellón", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Ceuta", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Ciudad Real", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Córdoba", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Córdoba", "Co", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("La Coruña", "A Coruña", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Cuenca", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Gerona", "Girona", "Ge", "Gi", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Granada", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Guadalajara", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Guipúzcoa", "Gipuzkoa", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Huelva", "H", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Huesca", "Hu", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Islas Baleares", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Islas Canarias", "Canarias", "Tenerife", "Lanzarote", "Gran Canaria", "La Gomera", "Fuerteventura", "La Palma",
+                    "Canary Islands"),
+                  c("Jaén", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("León", "Leon", "Le", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Lléida", "Lérida", "L", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Lugo", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Madrid", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Málaga", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Melilla", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Murcia", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Navarra", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Orense", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Palencia", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Pontevedra", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("La Rioja", "Rioja", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Salamanca", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Segovia", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Sevilla", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Soria", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Tarragona", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Teruel", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Toledo", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Valencia", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Valladolid", "Va", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Vizcaya", "Bizcaya", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Zamora", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  c("Zaragoza", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                  )
+
+filtrado <- prueba %>%
+  filter(
+    
+  )
+```
