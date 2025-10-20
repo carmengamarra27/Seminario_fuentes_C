@@ -17,16 +17,32 @@ library(tidyverse)
 library(rgbif)
 ```
 
+```{r}
+tablita <- occ_data(
+  country = "ES",
+  year = 2008
+)
+tablita
+```
+
 Utilizamos rgbif para coger los datos
 ```{r}
-prueba <- occ_data(
-  country = "ES",
-  year = "2015",
-  stateProvince = "Mu",
-  limit = 600
-)
+tabla_completa <- data.frame() 
+for (a in 2000:2020){
+  for (m in 1:12){
+    aux <- occ_data(
+      country = "ES",
+      year = a,
+      month = m,
+      limit = 200000
+    )
+    tabla_res <- aux$data %>%
+      select(key, year, month, stateProvince, locality, county, kingdom, species, individualCount)
+    tabla_completa <- rbind(tabla_completa, tabla_res)
+  }
+}
 
-prueba$data   # Si no lo pones así ($), te da dos opciones: tabla y solo número de registros
+tabla_completa
 ```
 
 Hay que estandarizar el formato de las provincias
