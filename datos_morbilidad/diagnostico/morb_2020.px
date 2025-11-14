@@ -1,0 +1,85 @@
+AXIS-VERSION="2006";
+CREATION-DATE="20251110";
+CHARSET="ANSI";
+SUBJECT-AREA="Resultados por comunidades autónomas y provincias";
+SUBJECT-CODE="null";
+MATRIX="02002";
+TITLE="Altas hospitalarias según el sexo, el diagnóstico principal, la provincia, Comunidad y Ciudad autónoma de residencia.";
+CONTENTS="Altas hospitalarias";
+CODEPAGE="iso-8859-15";
+DESCRIPTION="";
+COPYRIGHT=YES;
+NOTE="1) En cada uno de los grupos únicamente se incorporarán aquellos diagnósticos"
+" que se consideren principales.## 2) Para interpretar la información sobre la"
+"s altas hospitalarias del año 2020 debe tenerse en cuenta  que la Organizació"
+"n Mundial de la Salud (OMS) estableció en febrero de 2020 un  código de emerg"
+"encia en la Clasificación Internacional de Enfermedades (CIE-10) para  la cod"
+"ificación de las infecciones por COVID-19. Este código fue implementado en la"
+" CIE-10-CM  (clasificación utilizada en la codificación de los diagnósticos e"
+"n pacientes hospitalizados),  con carácter excepcional, a partir del 1 de abr"
+"il de 2020 por los Centros para el control  y la Prevención de Enfermedades d"
+"el Centro Nacional de EstadÝsticas de Salud (CDC / NCHS).  En España, dada la"
+" situación de crisis sanitaria que se estaba produciendo en esos momentos,  s"
+"e decidió no implementar el nuevo código hasta que se produjese una disminuci"
+"ón en la  presión asistencial y los sistemas de información pudiesen asumir e"
+"l cambio. Finalmente, el  nuevo código U07.1 para la infección por COVID-19 f"
+"ue implementado por los hospitales a partir de julio de 2020.";
+DECIMALS=0;
+SHOWDECIMALS=0;
+STUB="Sexo","Diagnóstico principal (CIE10MC)";
+HEADING="Provincia, Comunidad y Ciudad autónoma de residencia";
+VALUES("Sexo")="Ambos sexos";
+VALUES("Diagnóstico principal (CIE10MC)")="0100 CIERTAS ENFERMEDADES INFECCIOSAS Y PARASITARIAS A00-B99, U07.1",
+"0101 Enfermedades infecciosas intestinales, excepto diarrea A00-A08",
+"0102 Infecciones intestinales mal definidas A09",
+"0107 Otras enfermedades infecciosas y parasitarias Resto de  A00-B99",
+"1000 ENFERMEDADES DEL SISTEMA RESPIRATORIO J00-J99",
+"1001 Infecciones agudas de las vías respiratorias superiores y gripe J00-J11",
+"1002 Neumonía J12-J18","1003 Bronquitis y bronquiolitis agudas J20-J22",
+"1005 Otras enfermedades del tracto respiratorio superior J30-J34, J36-J39",
+"1006 Enfermedad pulmonar obstructiva crónica y bronquiectasias J40-J44, J47",
+"1007 Asma J45","1008 Otras enfermedades del sistema respiratorio J60-J99",
+"1200 ENFERMEDADES DE LA PIEL Y DEL TEJIDO SUBCUTÁNEO L00-L99",
+"1201 Infecciones de la piel y del tejido celular subcutáneo L00-L08",
+"1202 Dermatitis, eczema y trastornos papuloescamosos L20-L45",
+"1203 Otras enfermedades de la piel y del tejido subcutáneo Resto de L00-L99";
+VALUES("Provincia, Comunidad y Ciudad autónoma de residencia")="01 Andalucía","04 Almería","11 Cádiz","14 Córdoba","18 Granada","21 Huelva",
+"23 Jaén","29 Málaga","41 Sevilla","02 Aragón","22 Huesca","44 Teruel","50 Zaragoza",
+"03 Asturias, Principado de","04 Balears, Illes","05 Canarias","35 Palmas, Las",
+"38 Santa Cruz de Tenerife","06 Cantabria","07 Castilla y León","05 Ávila",
+"09 Burgos","24 León","34 Palencia","37 Salamanca","40 Segovia","42 Soria",
+"47 Valladolid","49 Zamora","08 Castilla - La Mancha","02 Albacete","13 Ciudad Real",
+"16 Cuenca","19 Guadalajara","45 Toledo","09 Cataluña","08 Barcelona","17 Girona",
+"25 Lleida","43 Tarragona","10 Comunitat Valenciana","03 Alicante/Alacant",
+"12 Castellón/Castelló","46 Valencia/València","11 Extremadura","06 Badajoz",
+"10 Cáceres","12 Galicia","15 Coruña, A","27 Lugo","32 Ourense","36 Pontevedra",
+"13 Madrid, Comunidad de","14 Murcia, Región de","15 Navarra, Comunidad Foral de",
+"16 País Vasco","01 Araba/Álava","48 Bizkaia","20 Gipuzkoa","17 Rioja, La","18 Ceuta",
+"19 Melilla";
+CODES("Provincia, Comunidad y Ciudad autónoma de residencia")="CA01","04","11","14","18","21","23","29","41","CA02","22","44","50","CA03","CA04","CA05","35",
+"38","CA06","CA07","05","09","24","34","37","40","42","47","49","CA08","02","13","16","19","45",
+"CA09","08","17","25","43","CA10","03","12","46","CA11","06","10","CA12","15","27","32","36","CA13",
+"CA14","CA15","CA16","01","48","20","CA17","CA18","CA19";
+MAP("Provincia, Comunidad y Ciudad autónoma de residencia")="spain_ccaapro_img_ind";
+SOURCE="Instituto Nacional de Estadística";
+UNITS="valores absolutos";
+DATA=30201.0 1838.0 4354.0 2841.0 4574.0 1474.0 2647.0 4385.0 8088.0 10041.0 1541.0 1181.0 7319.0 6102.0 5033.0 5052.0 2327.0 2725.0 2333.0 14471.0 991.0 2535.0 2748.0 1213.0 1860.0 523.0 614.0 2433.0 1553.0 9843.0 1884.0 2159.0 1189.0 1125.0 3486.0 45392.0 35428.0 4118.0 2528.0 3318.0 21481.0 8107.0 1996.0 11378.0 3868.0 2399.0 1469.0 8087.0 2957.0 1022.0
+ 1277.0 2831.0 42260.0 7226.0 3296.0 12257.0 1564.0 6178.0 4515.0 2061.0 324.0 397.0 1170.0 104.0 167.0 95.0 110.0 85.0 86.0 217.0 306.0 359.0 53.0 57.0 249.0 287.0 422.0 343.0 178.0 165.0 113.0 610.0 67.0 83.0 117.0 60.0 70.0 30.0 19.0 100.0 64.0 527.0 88.0 169.0 47.0 90.0 134.0 1863.0 1510.0 130.0
+ 49.0 174.0 1266.0 591.0 121.0 554.0 225.0 146.0 79.0 630.0 222.0 82.0 60.0 266.0 2160.0 357.0 154.0 579.0 107.0 319.0 153.0 120.0 8.0 8.0 809.0 73.0 201.0 78.0 51.0 54.0 20.0 174.0 158.0 196.0 27.0 13.0 155.0 114.0 151.0 315.0 124.0 191.0 33.0 234.0 14.0 32.0 42.0 12.0 33.0 15.0
+ 6.0 59.0 21.0 148.0 31.0 27.0 26.0 16.0 47.0 961.0 724.0 113.0 32.0 92.0 682.0 350.0 40.0 293.0 101.0 82.0 19.0 267.0 101.0 35.0 22.0 109.0 770.0 90.0 59.0 238.0 44.0 136.0 58.0 17.0 4.0 1.0 3048.0 230.0 533.0 270.0 272.0 229.0 216.0 457.0 840.0 972.0 114.0 70.0 789.0 610.0
+ 1066.0 829.0 351.0 478.0 291.0 1258.0 68.0 192.0 273.0 74.0 152.0 65.0 46.0 250.0 137.0 859.0 168.0 220.0 75.0 126.0 270.0 5356.0 4314.0 496.0 220.0 326.0 2600.0 899.0 299.0 1401.0 543.0 339.0 204.0 1473.0 525.0 223.0 225.0 500.0 3613.0 1199.0 332.0 1227.0 222.0 684.0 321.0 177.0 32.0 46.0 57465.0 5211.0
+ 8222.0 6598.0 6195.0 3642.0 4864.0 9729.0 13004.0 15348.0 2478.0 1647.0 11224.0 13380.0 11368.0 14962.0 6353.0 8608.0 6215.0 31897.0 2500.0 4608.0 6848.0 2460.0 3377.0 2120.0 1301.0 6289.0 2393.0 27234.0 4716.0 7730.0 2749.0 2655.0 9383.0 103787.0 83187.0 7353.0 4886.0 8362.0 47551.0 17763.0 5279.0 24510.0 11683.0 7454.0 4229.0 33101.0 11945.0 3602.0 5627.0 11927.0
+ 100751.0 12569.0 6947.0 25909.0 4803.0 13835.0 7271.0 4218.0 422.0 567.0 3615.0 323.0 578.0 331.0 354.0 311.0 239.0 524.0 954.0 1156.0 156.0 125.0 875.0 1039.0 1104.0 1058.0 429.0 629.0 395.0 1568.0 113.0 239.0 373.0 123.0 145.0 108.0 38.0 290.0 138.0 958.0 173.0 340.0 87.0 128.0 229.0 4940.0 3888.0 353.0 266.0 433.0
+ 2925.0 1158.0 325.0 1442.0 562.0 396.0 166.0 1826.0 752.0 213.0 170.0 691.0 3508.0 964.0 413.0 1594.0 293.0 805.0 496.0 252.0 55.0 54.0 17999.0 1221.0 2509.0 1968.0 2288.0 937.0 1625.0 3532.0 3919.0 4828.0 684.0 440.0 3704.0 4129.0 2865.0 3745.0 1702.0 2043.0 2063.0 11560.0 863.0 1741.0 2212.0 614.0 1459.0 1049.0 576.0 2309.0
+ 737.0 13757.0 2482.0 3816.0 1160.0 1378.0 4920.0 42712.0 35994.0 2617.0 1623.0 2477.0 15413.0 5124.0 1767.0 8522.0 3768.0 2072.0 1695.0 7931.0 2987.0 862.0 1580.0 2502.0 51655.0 3309.0 2540.0 8881.0 1951.0 4767.0 2162.0 1422.0 102.0 184.0 6642.0 922.0 1180.0 639.0 714.0 339.0 451.0 1063.0 1334.0 1885.0 266.0 243.0 1376.0 923.0 1651.0 1549.0
+ 565.0 984.0 248.0 3119.0 363.0 325.0 655.0 375.0 326.0 219.0 174.0 448.0 233.0 3196.0 399.0 732.0 525.0 325.0 1215.0 11284.0 8082.0 1001.0 974.0 1226.0 5253.0 2607.0 502.0 2144.0 1220.0 916.0 304.0 4903.0 1184.0 631.0 1305.0 1783.0 7633.0 1778.0 439.0 1677.0 193.0 1114.0 369.0 549.0 47.0 44.0 4426.0 411.0 607.0 299.0
+ 440.0 412.0 338.0 929.0 990.0 911.0 199.0 69.0 643.0 552.0 863.0 1037.0 387.0 649.0 254.0 2381.0 187.0 337.0 487.0 206.0 156.0 119.0 94.0 580.0 214.0 921.0 145.0 345.0 96.0 75.0 259.0 5115.0 3960.0 421.0 177.0 557.0 2667.0 948.0 223.0 1496.0 822.0 413.0 409.0 2053.0 791.0 182.0 228.0 852.0 4121.0 829.0
+ 403.0 1781.0 234.0 1091.0 456.0 172.0 28.0 28.0 6354.0 552.0 803.0 785.0 649.0 367.0 607.0 1103.0 1487.0 2241.0 393.0 223.0 1625.0 1994.0 2057.0 2073.0 988.0 1085.0 1079.0 4338.0 322.0 487.0 1148.0 452.0 360.0 230.0 135.0 805.0 398.0 2508.0 370.0 676.0 283.0 185.0 993.0 14253.0 11310.0 1077.0 777.0 1089.0 6076.0 2660.0
+ 738.0 2678.0 1174.0 797.0 377.0 5194.0 1787.0 709.0 815.0 1882.0 13318.0 1686.0 1051.0 3637.0 691.0 1901.0 1044.0 616.0 43.0 55.0 1102.0 117.0 127.0 117.0 222.0 60.0 77.0 173.0 208.0 316.0 33.0 33.0 250.0 703.0 419.0 380.0 256.0 124.0 249.0 697.0 40.0 140.0 108.0 75.0 84.0 28.0 25.0 140.0 57.0 411.0
+ 44.0 122.0 33.0 51.0 161.0 2223.0 1704.0 216.0 104.0 199.0 1082.0 443.0 134.0 504.0 167.0 114.0 53.0 1024.0 388.0 75.0 158.0 403.0 1973.0 352.0 140.0 929.0 161.0 513.0 255.0 126.0 2.0 8.0 15896.0 1479.0 2238.0 2301.0 1441.0 1027.0 1442.0 2170.0 3799.0 3742.0 717.0 482.0 2543.0 3946.0 2069.0 4417.0 1822.0 2595.0
+ 1782.0 7242.0 560.0 1175.0 1679.0 499.0 793.0 299.0 196.0 1533.0 507.0 4983.0 1015.0 1498.0 509.0 474.0 1487.0 21509.0 16998.0 1470.0 902.0 2138.0 12523.0 4310.0 1401.0 6811.0 3495.0 2418.0 1076.0 9151.0 3714.0 863.0 1295.0 3278.0 16695.0 3296.0 1588.0 6529.0 1103.0 3248.0 2178.0 979.0 142.0 181.0 5732.0 437.0 1053.0 575.0 415.0 346.0
+ 330.0 1202.0 1373.0 1269.0 273.0 117.0 880.0 1050.0 1287.0 1816.0 796.0 1020.0 554.0 2102.0 116.0 367.0 498.0 148.0 155.0 148.0 75.0 453.0 141.0 1386.0 265.0 299.0 162.0 175.0 484.0 8743.0 6696.0 829.0 362.0 856.0 4366.0 1861.0 345.0 2160.0 933.0 544.0 390.0 3101.0 1074.0 403.0 417.0 1206.0 5403.0 1467.0 521.0 2343.0
+ 319.0 1198.0 825.0 283.0 68.0 62.0 2992.0 277.0 545.0 255.0 205.0 202.0 149.0 664.0 695.0 714.0 160.0 65.0 489.0 614.0 766.0 1039.0 436.0 603.0 296.0 1137.0 62.0 215.0 246.0 78.0 82.0 83.0 39.0 252.0 79.0 761.0 149.0 148.0 93.0 86.0 284.0 4988.0 3841.0 486.0 208.0 453.0 2583.0 1176.0 199.0 1208.0
+ 481.0 263.0 218.0 1897.0 669.0 260.0 266.0 702.0 2780.0 793.0 265.0 1455.0 194.0 726.0 535.0 143.0 43.0 36.0 132.0 11.0 24.0 11.0 3.0 11.0 6.0 29.0 37.0 29.0 9.0 4.0 16.0 38.0 44.0 55.0 29.0 26.0 15.0 58.0 5.0 8.0 19.0 6.0 4.0 1.0 2.0 11.0 2.0 45.0 9.0 19.0
+ 5.0 3.0 9.0 255.0 219.0 16.0 7.0 13.0 113.0 58.0 8.0 47.0 33.0 20.0 13.0 137.0 51.0 13.0 8.0 65.0 204.0 41.0 15.0 82.0 17.0 39.0 26.0 10.0 1.0 1.0 2608.0 149.0 484.0 309.0 207.0 133.0 175.0 509.0 641.0 526.0 103.0 48.0 375.0 398.0 476.0 722.0 331.0 391.0 242.0 906.0
+ 49.0 144.0 232.0 64.0 68.0 64.0 34.0 190.0 60.0 580.0 107.0 133.0 64.0 85.0 191.0 3500.0 2636.0 327.0 147.0 390.0 1670.0 628.0 138.0 904.0 419.0 261.0 159.0 1066.0 354.0 130.0 143.0 438.0 2419.0 633.0 241.0 805.0 108.0 433.0 264.0 130.0 24.0 25.0;
