@@ -3,115 +3,394 @@ title: "Seminario_C"
 output: html_notebook
 ---
 
-Prueba inicial de las tablas de biodiversidad en un notebook 
+Prueba inicial de las tablas de biodiversidad en un notebook
 
 Primero, instalar los paquetes
+
 ```{r}
-install.packages(tidyverse)
-install.packages(rgbif)
+install.packages("tidyverse")
+install.packages("rgbif")
 ```
 
 Importamos los paquetes
+
 ```{r}
 library(tidyverse)
 library(rgbif)
-```
+library(dplyr)
 
-```{r}
-tablita <- occ_data(
-  country = "ES",
-  year = 2008
+occ_download(
+  pred_gte("year", 2000),
+  pred_lte("year", 2020),
+  pred("country", "ES"),
+  format = "SIMPLE_CSV"
 )
-tablita
+
+"GBIF Occurrence Download https://doi.org/10.15468/dl.xrsgzw Accessed from R via rgbif (https://github.com/ropensci/rgbif) on 2025-11-11"
+
+occ_download_wait("0027295-251025141854904")
+
+tabla_gbif <- occ_download_get(key = "0027295-251025141854904", path = "INPUT/GBIF") %>%
+  occ_download_import(path = "INPUT/GBIF") %>%
+  select(gbifID, year, decimalLongitude, decimalLatitude, stateProvince, locality, kingdom, species) %>%
+  filter(kingdom != "incertae sedis") %>%     # Quitamos aquellos cuyo reino es incierto
+  filter(!is.na(species) & species != "") %>%
+  filter((!is.na(decimalLongitude) & !is.na(decimalLatitude)) |
+           ((!is.na(stateProvince) & stateProvince != "") | (!is.na(locality) & locality != "")))
+
 ```
 
-Utilizamos rgbif para coger los datos
+
+Queremos determinar la diversidad de especies en cada provincia, y contamos con dos maneras de obtenerla: o por coordenadas, o por los datos aportados de la región. Debemos estandarizar el valor de estas provincias para su empleo posterior
+
 ```{r}
-tabla_completa <- data.frame() 
-for (a in 2000:2020){
-  for (m in 1:12){
-    aux <- occ_data(
-      country = "ES",
-      year = a,
-      month = m,
-      limit = 200000
+# Utilizamos el paquete 'mapSpain' para obtener las coordenadas que definen cada provincia
+library(mapSpain)
+library(sf)
+library(rjson)
+
+
+# Tomamos aquellas filas que contengan información de coordenadas
+tabla_coords <- tabla_gbif %>%
+  select(gbifID, year, decimalLatitude, decimalLongitude, species) %>%
+  filter(!is.na(decimalLongitude) & !is.na(decimalLatitude))
+
+
+# Empleamos el polígono de coordenadas para hacer la asignación de provincias
+prov_sf <- esp_get_prov(epsg = 4326)
+points_sf = st_as_sf(tabla_coords, coords = c("decimalLongitude", "decimalLatitude"), crs = 4326)
+tabla_coords <- as.data.frame(st_join(points_sf, prov_sf["ine.prov.name"], join = st_intersects))
+
+
+# Otra manera de trabajar con todas aquellas sin coordenadas es con la información de locaización
+tabla_local <- tabla_gbif %>%
+  filter((!is.na(stateProvince) & stateProvince != "") | (!is.na(locality) & locality != "")) %>%
+  mutate(localizacion = paste(stateProvince, locality, sep = ",")) %>%
+  select(gbifID, year, localizacion, kingdom, species) %>%
+  # Renombramos según la provincia mencionada
+  mutate(
+    provincia = case_when(
+      str_detect(localizacion, "Álava|Araba|Alava|ALAVA") ~ "Araba/Álava",
+      str_detect(localizacion, "Albacete") ~ "Albacete",
+      str_detect(localizacion, "Alicante|Alacant") ~ "Alicante/Alacant",
+      str_detect(localizacion, "Almería|Almeria") ~ "Almería",
+      str_detect(localizacion, "Asturias|Asturies|Oviedo") ~ "Asturias",
+      str_detect(localizacion, "Ávila|Avila") ~ "Ávila",
+      str_detect(localizacion, "Badajoz") ~ "Badajoz",
+      str_detect(localizacion, "Barcelona|Barcelonés") ~ "Barcelona",
+      str_detect(localizacion, "Burgos") ~ "Burgos",
+      str_detect(localizacion, "Cáceres|Caceres") ~ "Cáceres",
+      str_detect(localizacion, "Cádiz") ~ "Cádiz",
+      str_detect(localizacion, "Cantabria|Cantabric|Santander") ~ "Cantabria",
+      str_detect(localizacion, "Castellón|Castelló") ~ "Castellón/Castelló",
+      str_detect(localizacion, "Ceuta") ~ "Ceuta",
+      str_detect(localizacion, "Ciudad Real") ~ "Ciudad Real",
+      str_detect(localizacion, "Córdoba|Cordoba") ~ "Córdoba",
+      str_detect(localizacion, "Coruña|coruña|Coruna|coruna") ~ "Coruña, A",
+      str_detect(localizacion, "Cuenca") ~ "Cuenca",
+      str_detect(localizacion, "Gerona|Girona") ~ "Girona",
+      str_detect(localizacion, "Granada") ~ "Granada",
+      str_detect(localizacion, "Guadalajara") ~ "Guadalajara",
+      str_detect(localizacion, "Guipúzcoa|Guipuzcoa|Gipuzkoa") ~ "Gipuzkoa",
+      str_detect(localizacion, "Huelva") ~ "Huelva",
+      str_detect(localizacion, "Huesca") ~ "Huesca",
+      str_detect(localizacion, "Baleares|Balearic|Balears|Menorca|Mallorca") ~ "Balears, Illes",
+      str_detect(localizacion, "Gran Canaria|Lanzarote|Gomera|Fuerteventura|Palma") ~ "Palmas, Las",
+      str_detect(localizacion, "Santa Cruz|Tenerife|Hierro") ~ "Santa Cruz de Tenerife",
+      str_detect(localizacion, "Jaén|Jaen") ~ "Jaén",
+      str_detect(localizacion, "Lléida|Lérida|LLeida|Lerida") ~ "Lleida",
+      str_detect(localizacion, "Lugo") ~ "Lugo",
+      str_detect(localizacion, "Madrid") ~ "Madrid",
+      str_detect(localizacion, "Málaga|Malaga") ~ "Málaga",
+      str_detect(localizacion, "Melilla") ~ "Melilla",
+      str_detect(localizacion, "Murcia") ~ "Murcia",
+      str_detect(localizacion, "Navarra|Nafarroa|Navarre|Pamplona") ~ "Navarra",
+      str_detect(localizacion, "Orense|Ourense") ~ "Ourense",
+      str_detect(localizacion, "Palencia") ~ "Palencia",
+      str_detect(localizacion, "Pontevedra|Pontevedro") ~ "Pontevedra",
+      str_detect(localizacion, "Rioja|Logroño|Logrono") ~ "Rioja, La",
+      str_detect(localizacion, "Salamanca") ~ "Salamanca",
+      str_detect(localizacion, "Segovia") ~ "Segovia",
+      str_detect(localizacion, "Sevilla") ~ "Sevilla",
+      str_detect(localizacion, "Soria") ~ "Soria",
+      str_detect(localizacion, "Tarragona|Alfacs|Fangar") ~ "Tarragona",
+      str_detect(localizacion, "Teruel") ~ "Teruel",
+      str_detect(localizacion, "Toledo") ~ "Toledo",
+      str_detect(localizacion, "Valencia") ~ "Valencia/València",
+      str_detect(localizacion, "Valladolid") ~ "Valladolid",
+      str_detect(localizacion, "Vizcaya|Bizcaya|Bizkaia|Viscay|Bilbao") ~ "Bizkaia",
+      str_detect(localizacion, "Zamora") ~ "Zamora",
+      str_detect(localizacion, "Zaragoza") ~ "Zaragoza",
+      str_detect(localizacion, "León|Leon") ~ "León"
     )
-    tabla_res <- aux$data %>%
-      select(key, year, month, stateProvince, locality, county, kingdom, species, individualCount)
-    tabla_completa <- rbind(tabla_completa, tabla_res)
-  }
+  )
+
+
+
+# Con las tablas normalizadas, las unimos para optener el número de especies de cada reino
+gbif <- tabla_coords %>%
+  rename(provincia = ine.prov.name) %>%
+  select(gbifID, provincia, year, kingdom, species) %>%
+  filter(!is.na(provincia)) %>%
+  rbind(x = ., y = tabla_local %>%
+    select(gbifID, provincia, year, kingdom, species) %>%
+    filter(!is.na(provincia))) %>%
+  group_by(provincia, year, kingdom) %>%
+  summarise(n_especies = n_distinct(species))
+
+
+# Tabla resumida disponible en JSON
+gbifJSON <- rjson::toJSON(gbif)
+write(x = gbifJSON, file = "INPUT/GBIF/gbif_datos.json")
+
+```
+
+
+Hay diversas maneras de estudiar la biodiversidad de un territorio. Por un lado, podemos emplear la **riqueza específica**, el número de especies en un área. Es lo que se suele conocer como **diversidad alpha**.
+
+Sin embargo, también puede ser útil examinar la **diversidad por kilómetro cuadrado**. Una mayor variedad de especies en un área menor de terriotrio puede tener más efecto en la población que si estuvieran más dispersas. 
+
+```{r}
+# Tomamos la tabla que hemos obtenido anteriormente.
+# En primer lugar, calculamos la cantidad de especies en cada territorio
+gbif_tabla <- as.data.frame(fromJSON(file = "INPUT/GBIF/gbif_datos.json")) %>%
+  group_by(provincia, year) %>%
+  summarise(n_especies = sum(n_especies))
+
+
+# Ahora, obtenemos el área de cada provincia para poder calcular el índice de diversidad
+library(pdftools)
+library(tidyverse)
+library(stringr)
+
+
+# Lee las páginas del pdf una a una y las separa por filas
+ficha_pdf <- pdf_text("INPUT/GBIF/extension_provincias.pdf") %>%
+  str_split("\n")
+
+
+# La info correspondiente a las provincias está en la 3 primeras páginas del pdf
+ficha_provincias <- ficha_pdf[1:3]
+
+
+# Vamos a unir todas las líneas de las páginas en un sólo vector 
+# Unlist: convierte lista anidada en un vector atómico
+# Eliminamos las lineas de la cabecera que no nos interesan, lineas en blanco y última linea que tampoco nos interesa
+# Eliminamos también las filas que están vacías
+lineas <- unlist(ficha_provincias)[-(1:10)]
+lineas <- lineas[trimws(lineas) != ""]
+
+
+# Eliminamos la linea en la que indica la fuente
+lineas_a_eliminar <- str_detect(lineas, "Fuente:")
+datos_provinciales <- lineas[!lineas_a_eliminar]
+
+
+# Corregimos nombre que se había dividido en dos lineas
+datos_provinciales[40] <- "CASTILLA LA MANCHA            79.461       –     9.982   53.091   16.379    9" 
+datos_provinciales <- datos_provinciales[-41]
+
+
+datos_provinciales <- datos_provinciales %>% # <-- INICIAMOS LA TUBERÍA CON EL OBJETO
+  # Reemplazar el guion ('–') por el valor faltante NA
+  str_replace_all("–", "NA") %>%
+  # Eliminar los puntos (separadores de miles)
+  str_replace_all("\\.", "")
+
+
+#  Limpieza de caracteres
+datos_finales <- datos_provinciales %>% 
+  stringr::str_remove("^\\[\\d+\\].*?\\s+") %>%   # Quitar índices
+  stringr::str_replace_all("–", "NA") %>%         # Reemplazar guiones por NA
+  stringr::str_replace_all("\\.", "")             # Quitar puntos (miles)
+
+
+# Separar cada línea por 2 o más espacios y convertir en data frame
+lista <- strsplit(datos_finales, "\\s{2,}")
+lista <- lapply(lista, function(x) x[x != ""])   # Quitar elementos vacíos
+df_provincias <- as.data.frame(do.call(rbind, lista), stringsAsFactors = FALSE)
+
+
+#  Renombrar columnas y tipar
+df_provincias <- df_provincias %>%
+  rename(
+    Provincia = V1,
+    Total_km2 = V2,
+    Columna_A = V3,
+    Columna_B = V4,
+    Columna_C = V5,
+    Columna_D = V6
+  ) %>%
+  mutate(across(Total_km2:Columna_D, ~ as.integer(.x)))
+
+df_provincias
+
+df_total <- select(df_provincias, Provincia,Total_km2) %>%
+  filter(!(str_detect(Provincia, '[:upper:]') & !str_detect(Provincia, '[:lower:]') & !(Provincia %in% 
+    c("BALEARES", "S C Tenerife", "P DE ASTURIAS", "CANTABRIA", "NAVARRA", "LA RIOJA", "MADRID", "R DE MURCIA")))) %>%
+  mutate(
+    Provincia = case_when(
+      Provincia == "A Coruña" ~ "Coruña, A",
+      Provincia == "Alava" ~ "Araba/Álava",
+      Provincia == "Guipúzcoa" ~ "Gipuzkoa",
+      Provincia == "Vizcaya" ~ "Bizkaia",
+      Provincia == "BALEARES" ~ "Balears, Illes",
+      Provincia == "Avila" ~ "Ávila",
+      Provincia == "Alicante" ~ "Alicante/Alacant",
+      Provincia == "Castellón" ~ "Castellón/Castelló",
+      Provincia == "Valencia" ~ "Valencia/València",
+      Provincia == "Palmas (Las)" ~ "Palmas, Las",
+      Provincia == "S C Tenerife" ~ "Santa Cruz de Tenerife",
+      Provincia == "P DE ASTURIAS" ~ "Asturias",
+      Provincia == "CANTABRIA" ~ "Cantabria",
+      Provincia == "NAVARRA" ~ "Navarra",
+      Provincia == "LA RIOJA" ~ "Rioja, La",
+      Provincia == "MADRID" ~ "Madrid",
+      Provincia == "R DE MURCIA" ~ "Murcia",
+      TRUE ~ Provincia
+    )
+  )
+
+df_total
+unique(gbif_tabla$provincia)
+
+# Unimos los dos dataframe y calculamos la diversidad por kilómetro cuadrado
+gbif_tabla <- gbif_tabla %>%
+  filter(!is.na(provincia)) %>%
+  left_join(df_total, by = c("provincia" = "Provincia")) %>%
+  mutate(indice_km2 = round(n_especies/Total_km2, digits = 3))
+
+unique(gbif_tabla$provincia)
+
+# APLICACIÓN SHINY
+# Lo guardaremos para la visualización
+gbifJSON <- rjson::toJSON(gbif_tabla)
+write(x = gbifJSON, file = "app_diversidad/DATA/gbifJSON.json")
+
+```
+
+
+CUIDADO CON LOS NOMBRES, HAY VARIOS REPETIDOS!!!
+TEXTO INTRODUCTORIO DELAS HOSPITALIZACIONES!!!!!
+
+```{r}
+#Data frame con las altas por diagnóstico y provincia desde 2000 a 2020
+library(pxR)
+library(dplyr)
+
+#Ruta incompleta para hacer bucle por año, dado que los archivos tienen como nombre: morb_año
+ruta <- "INPUT/datos_morbilidad/diagnostico/"
+
+#Vector de años
+años <- c(2000:2020)
+
+#Lista vacía donde ir almacenando los df de cada año
+lista_df <- list()
+
+#bucle para importar datos de cada año
+for (año in años) {
+  nombre_archivo <- paste0(ruta, "morb_",año,".px")
+  
+  datos_anuales <- read.px(nombre_archivo)
+  df_anual <- as.data.frame(datos_anuales)
+  
+#matches busca coincidencias en los nombres (varían nombres de las columnas según el año aunque se refieran a lo mismo)
+  df_anual <- df_anual %>%
+    rename(Grupo_edad = matches("Grupos.de.edad"),
+           Diagnostico_principal = matches("Diagnóstico"),
+           Lugar_hospitalizacion = matches("Provincia"),
+           Altas = value)
+  
+  #Para añadir columna del año
+  df_anual$Año <- año
+  
+  lista_df[[as.character(año)]] <- df_anual
 }
 
-tabla_completa
+#Unir todos los data frames en uno
+df_total <- bind_rows(lista_df)
+df_total <- select(df_total,Lugar_hospitalizacion, Diagnostico_principal, Altas, Año) #La columna "Sexo" no nos interesa
+
+
+df_total
 ```
 
-Hay que estandarizar el formato de las provincias
+
+TEXTO DE DIAGNÓSTICOS POR GRUPOS DE EDAD!!!!
+
 ```{r}
-# Nombres estandarizados de las provincias
-provincias_std <- c("Álava", "Albacete", "Alicante", "Almería", "Asturias", "Ávila", "Badajoz", "Barcelona", "Burgos", "Cáceres", "Cádiz", 
-                    "Cantabria", "Castellón", "Ceuta", "Ciudad Real", "Córdoba", "La Coruña", "Cuenca", "Gerona", "Granada", "Guadalajara", 
-                    "Guipúzcoa", "Huelva", "Huesca", "Islas Baleares", "Islas Canarias","Jaén", "León", "Lléida", "Lugo", "Madrid", "Málaga", 
-                    "Melilla", "Murcia", "Navarra", "Orense", "Palencia","Pontevedra", "La Rioja", "Salamanca", "Segovia", "Sevilla", "Soria",
-                    "Tarragona", "Teruel", "Toledo", "Valencia", "Valladolid", "Vizcaya", "Zamora", "Zaragoza")
+#Ruta incompleta para hacer bucle por año, dado que los archivos tienen como nombre: morb_año
+ruta <- "INPUT/datos_morbilidad/grupo_edad/"
 
-# Vectores con las variantes posibles de cada provincia
-variantes <- list(c("Álava", "Araba", "Alava", "Araba/Álava", "", ""),
-                  c("Albacete", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Alicante", "A", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Almería", "Al", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Asturias", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Ávila", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Badajoz", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Barcelona", "B", "Barcelonès", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Burgos", "Bu", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Cáceres", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Cádiz", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Cantabria", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Castellón", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Ceuta", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Ciudad Real", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Córdoba", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Córdoba", "Co", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("La Coruña", "A Coruña", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Cuenca", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Gerona", "Girona", "Ge", "Gi", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Granada", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Guadalajara", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Guipúzcoa", "Gipuzkoa", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Huelva", "H", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Huesca", "Hu", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Islas Baleares", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Islas Canarias", "Canarias", "Tenerife", "Lanzarote", "Gran Canaria", "La Gomera", "Fuerteventura", "La Palma",
-                    "Canary Islands"),
-                  c("Jaén", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("León", "Leon", "Le", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Lléida", "Lérida", "L", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Lugo", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Madrid", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Málaga", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Melilla", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Murcia", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Navarra", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Orense", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Palencia", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Pontevedra", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("La Rioja", "Rioja", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Salamanca", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Segovia", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Sevilla", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Soria", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Tarragona", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Teruel", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Toledo", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Valencia", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Valladolid", "Va", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Vizcaya", "Bizcaya", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Zamora", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  c("Zaragoza", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-                  )
 
-filtrado <- prueba %>%
-  filter(
-    
-  )
+#Vector de años
+años <- c(2005:2015)
+
+
+#Lista vacía donde ir almacenando los df de cada año
+lista_df <- list()
+
+
+#bucle para importar datos de cada año
+for (año in años) {
+  nombre_archivo <- paste0(ruta, "morb_",año,".px")
+  datos_anuales <- read.px(nombre_archivo)
+  df_anual <- as.data.frame(datos_anuales)
+  #matches busca coincidencias en los nombres (a partir de 2010 cambiaban los nombres de las columnas)
+  df_anual <- df_anual %>%
+    rename(Grupo_edad = matches("Grupos.de.edad"),
+           Diagnostico_principal = matches("Diagnóstico.principal"),
+           Lugar_hospitalización = matches("Provincia"),
+           Altas = value)
+  #Para añadir columna del año
+  df_anual$año <- año
+  lista_df[[as.character(año)]] <- df_anual
+}
+
+
+#Unir todos los data frames en uno
+df_total <- bind_rows(lista_df)
+
+
+df_total
+
 ```
+
+
+Sin embargo, si bien podemos ver el lado positivo de la exposición a biodiversidad, como menor prevalencia de infecciones y alergias, podemos estudiar también el efecto que esta tiene en la necesidad y efectividad de medicamentos.
+
+Tomaremos datos sobre los diferentes fármacos consumidos cada año en cada región
+
+```{r}
+# Cargamos los datos
+medicacion <- read.csv(file = "INPUT/Medicamentos/Recetas_facturadas_SNS.csv")
+
+
+gbif_tabla <- gbif_tabla %>%
+  mutate(ccaa = case_when(
+    provincia %in% c("Almería", "Cádiz", "Córdoba", "Granada", "Huelva", "Jaén", "Málaga", "Sevilla") ~ "Andalucía",
+    provincia %in% c("Huesca", "Teruel", "Zaragoza") ~ "Aragón",
+    provincia %in% c("Asturias") ~ "Asturias, Principado de",
+    provincia %in% c("Balears, Illes") ~ "Balears, Illes",
+    provincia %in% c("Palmas, Las", "Santa Cruz de Tenerife") ~ "Canarias",
+    provincia %in% c("Cantabria") ~ "Cantabria",
+    provincia %in% c("Ávila", "Burgos", "León", "Palencia", "Salamanca", "Segovia", "Soria", "Valladolid", "Zamora") ~ "Castilla y León",
+    provincia %in% c("Albacete", "Ciudad Real", "Cuenca", "Guadalajara", "Toledo") ~ "Castilla-La Mancha",
+    provincia %in% c("Barcelona", "Girona", "Lleida", "Tarragona") ~ "Cataluña",
+    provincia %in% c("Alicante/Alacant", "Castellón/Castelló", "Valencia/València") ~ "Comunitat Valenciana",
+    provincia %in% c("Badajoz", "Cáceres") ~ "Extremadura",
+    provincia %in% c("Coruña, A", "Lugo", "Ourense", "Pontevedra") ~ "Galicia",
+    provincia %in% c("Madrid") ~ "Madrid, Comunidad de",
+    provincia %in% c("Murcia") ~ "Murcia, Región de",
+    provincia %in% c("Navarra") ~ "Navarra, Comunidad Foral de",
+    provincia %in% c("Araba/Álava", "Bizkaia", "Gipuzcoa") ~ "País Vasco",
+    provincia %in% c("Rioja, La") ~ "Rioja, La",
+    provincia %in% c("Ceuta") ~ "Ceuta",
+    provincia %in% c("Melilla") ~ "Melilla")
+  ) %>%
+
+
+medicacion
+
+```
+
