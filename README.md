@@ -1,3 +1,2 @@
-# RELACIÓN ENTRE LA BIODIVERSIDAD Y <img src='./INPUT/imag_inmunidad.jpg' align="right" height="140" />
-#LA FORTALEZA DEL SISTEMA INMUNE 
-
+# RELACIÓN ENTRE LA BIODIVERSIDAD Y LA FORTALEZA DEL SISTEMA INMUNE 
+<img src='./INPUT/imag_inmunidad.jpg' align="right" height="140" />
