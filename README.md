@@ -8,7 +8,7 @@ Repositorio en el que se desarrollará el código necesario para llevar a cabo e
 Grupo: C
 
 ***
-##Introducción: 
+## Introducción: 
 
 El desarrollo del sistema inmunológico está influenciado tanto por factores genéticos como ambientales. 
 En 1989, los estudios de familias de Strachman (**CITAR AQUIIIIII**) le llevan a plantear la denominada *hipótesis de la higiene*, 
@@ -21,8 +21,9 @@ En este proyecto, trataremos de explorar la relación entre la riqueza de especi
 Planteamos que la exposición a una mayor biodiversidad puede amortiguar las incidencias de infecciones y enfermedades respiratorias, 
 jugando un papel crucial en el desarrollo inmunológico infantil. 
 
+---
 
-##Objetivos:
+## Objetivos:
 
 Nuestro objetivo es estudiar la influencia de la biodiversidad regional de España en la inmunidad de sus habitantes, tomando en cuenta distintos 
 indicadores de salud relacionados con la inmunidad humana.
