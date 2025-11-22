@@ -1,20 +1,70 @@
 ---
-title: "Seminario_C"
-output: html_notebook
+title: "Biodiversidad e Inmunidad Humana"
+author: "Carmen Gamarra Valenciano, Itsaso Madrigal Román"
+date: "Sys.Date()"
+output: 
+  html_notebook:
+    toc: TRUE
+    toc_float: TRUE
 ---
 
-Prueba inicial de las tablas de biodiversidad en un notebook
+Correlación entre la biodiversidad regional española y diversos indicadores de salud en la población local.
 
-Primero, instalar los paquetes
 
-```{r}
+
+## Introducción
+
+El desarrollo del sistema inmunológico está influenciado tanto por factores genéticos como ambientales. En 1989, los estudios de familias de Strachman (**CITAR AQUIIIIII**) le llevan a plantear la denominada *hipótesis de la higiene*, y sugiere que la exposición temprana a una mayor cantidad de microorganismos reforzaba al sistema inmunológico contra el desarrollo de alergias. En los años posteriores, estas investigaciones se extendieron al análisis de la relación entre biodiversidad, la microbiota humana y la persistencia de enfermedades inflamatorias (https://pmc.ncbi.nlm.nih.gov/articles/PMC3207110/).
+
+Según esta teoría, los individuos que crecen en entornos con mayor diversidad de plantas, animales y microorganismos sufren una mayor exposición a antígenos naturales, lo que favorece el refuerzo del sistema inmune y reduce la vulnerabilidad ante patologías infecciosas y respiratorias.
+
+En este proyecto, trataremos de explorar la relación entre la riqueza de especies de las provincias de España y la persistencia de ciertas enfermedades. Planteamos que la exposición a una mayor biodiversidad puede amortiguar las incidencias de infecciones y enfermedades respiratorias, jugando un papel crucial en el desarrollo inmunológico infantil. 
+
+
+## Objetivos
+
+Nuestro objetivo es estudiar la influencia de la biodiversidad regional de España en la inmunidad de sus habitantes, tomando en cuenta distintos indicadores de salud relacionados con la inmunidad humana.
+
+### Objetivos específicos
+
+- Analizar cómo la riqueza de especies por provincia varía con el tiempo, y su posible asociación con las hospitalizaciones por infección o enfermedad respiratoria.
+- Estudiar si es posible determinar la influencia de esta biodiversidad en el desarrollo infantil, distinguiendo los pacientes estudiados por gurpos de edad.
+- Analizar la relación entre la diversidad de especies por Comunidad Autónoma y el consumo de fármacos, intentando asociar una mayor exposición con un consumo menor de fármacos tipo antibióticos, antifúngicos, antihistamínicos...
+
+
+## Metodología
+
+Primero, instalaremos y cargaremos todos los paquetes que necesitaremos en todo este proyecto.
+
+```{r eval=FALSE}
 install.packages("tidyverse")
 install.packages("rgbif")
+install.packages("pxR")
 ```
 
-Importamos los paquetes
-
 ```{r}
+library(tidyverse)
+library(rgbif)
+library(dplyr)
+library(mapSpain)
+library(sf)
+library(rjson)
+
+```
+
+
+Tras la carga de estos paquetes, comenzaremos con la descarga y adaptación de los datos.
+
+
+### Datos sobre biodiversidad. GBIF 
+
+#### Descarga de la tabla base
+
+El **Sistema Global de Información sobre Biodiversidad** (GBIF) es una fuente de datos internacional sobre las diferentes especies registradas en el mundo. A través de su API, podemos hacer la petición de los datos que nos interesa analizar, tomando en nuestro caso las funciones de descarga de **ocurrencias** (observaciones de una especie en un lugar y momento determinados).
+
+Dados los limitados datos proporcionados por el INe en nuestro punto central de estudio, solo pediremos aquellos datos relativos al intervalo del año 2000 al 2020. Asimismo, de todas las columnas proporcionadas en la descarga, tomaremos solo aquellas referidas a datos de localización e identificación de especies.
+
+```{r eval=FALSE}
 library(tidyverse)
 library(rgbif)
 library(dplyr)
@@ -32,8 +82,7 @@ occ_download_wait("0027295-251025141854904")
 
 tabla_gbif <- occ_download_get(key = "0027295-251025141854904", path = "INPUT/GBIF") %>%
   occ_download_import(path = "INPUT/GBIF") %>%
-  select(gbifID, year, decimalLongitude, decimalLatitude, stateProvince, locality, kingdom, species) %>%
-  filter(kingdom != "incertae sedis") %>%     # Quitamos aquellos cuyo reino es incierto
+  select(gbifID, year, decimalLongitude, decimalLatitude, stateProvince, locality, species) %>%
   filter(!is.na(species) & species != "") %>%
   filter((!is.na(decimalLongitude) & !is.na(decimalLatitude)) |
            ((!is.na(stateProvince) & stateProvince != "") | (!is.na(locality) & locality != "")))
@@ -41,33 +90,49 @@ tabla_gbif <- occ_download_get(key = "0027295-251025141854904", path = "INPUT/GB
 ```
 
 
-Queremos determinar la diversidad de especies en cada provincia, y contamos con dos maneras de obtenerla: o por coordenadas, o por los datos aportados de la región. Debemos estandarizar el valor de estas provincias para su empleo posterior
+Debido a cuestiones de tiempo y memoria, si se quisiera ver el formato de la tabla original, prueba a ejecutar el siguiente código. *occ_search()* no solo permite ver las columnas de las que están compuestas las bases de datos del GBIF, sino que también permite ver cuántos registros tenemos originalmente:
 
 ```{r}
-# Utilizamos el paquete 'mapSpain' para obtener las coordenadas que definen cada provincia
-library(mapSpain)
-library(sf)
-library(rjson)
+occ_search(
+  year = "2000,2020",
+  country = "ES",
+  limit = 50
+)
+```
 
 
-# Tomamos aquellas filas que contengan información de coordenadas
+En el ejemplo presentado, se puede ver claramente que disponemos de varias columnas representativas del lugar de observación. Cada ocurrencia está asociada, o bien con un par de coordenadas, o bien con el nombre de la provincia en la que se ha registrado. 
+
+Sin embargo, muchos de estos registros cuentan solo con uno de los métodos de identificación, si es que tienen alguno. Por ello, va a ser necesario estandarizar los datos de la tabla original descargada. Tomaremos por un lado, aquellos identificados por sus coordenadas espaciales, y por otro, los que pueden contar con el nombre de la provincia. 
+
+Finalmente, los uniremos en una misma tabla, teniendo en cuenta la clave primaria que identifica estos registros (*gbifID*).
+
+
+Primero, tomamos aquellas filas que contengan información de coordenadas:
+
+```{r eval=FALSE}
 tabla_coords <- tabla_gbif %>%
   select(gbifID, year, decimalLatitude, decimalLongitude, species) %>%
   filter(!is.na(decimalLongitude) & !is.na(decimalLatitude))
+```
 
 
-# Empleamos el polígono de coordenadas para hacer la asignación de provincias
+Empleamos el polígono de coordenadas para hacer la asignación de provincias.
+
+```{r eval=FALSE}
 prov_sf <- esp_get_prov(epsg = 4326)
 points_sf = st_as_sf(tabla_coords, coords = c("decimalLongitude", "decimalLatitude"), crs = 4326)
 tabla_coords <- as.data.frame(st_join(points_sf, prov_sf["ine.prov.name"], join = st_intersects))
+```
 
 
-# Otra manera de trabajar con todas aquellas sin coordenadas es con la información de locaización
+Otra manera de trabajar con aquellas filas sin coordenadas es con la información de localización, que se puede encontrar, de manera más o menos detallada, en las columnas 'stateProvince' y 'locality'. Agruparemos toda la información relativa a la ubicación en una misma fila para ahorrar comparaciones, y renombramos según la provincia contenida en nuestra columna creada. Por cada provincia, a lo largo de los años se han empleado diferentes variantes, por lo que debemos buscar cualquiera de ellas para la asignación.
+
+```{r eval=FALSE}
 tabla_local <- tabla_gbif %>%
   filter((!is.na(stateProvince) & stateProvince != "") | (!is.na(locality) & locality != "")) %>%
   mutate(localizacion = paste(stateProvince, locality, sep = ",")) %>%
-  select(gbifID, year, localizacion, kingdom, species) %>%
-  # Renombramos según la provincia mencionada
+  select(gbifID, year, localizacion, species) %>%
   mutate(
     provincia = case_when(
       str_detect(localizacion, "Álava|Araba|Alava|ALAVA") ~ "Araba/Álava",
@@ -125,71 +190,140 @@ tabla_local <- tabla_gbif %>%
     )
   )
 
+```
 
 
-# Con las tablas normalizadas, las unimos para optener el número de especies de cada reino
+Para terminar, unimos las tablas normalizadas para optener las especies de cada reino en una provincia y año determinados:
+
+```{r eval=FALSE}
 gbif <- tabla_coords %>%
   rename(provincia = ine.prov.name) %>%
-  select(gbifID, provincia, year, kingdom, species) %>%
+  select(gbifID, provincia, year, species) %>%
   filter(!is.na(provincia)) %>%
   rbind(x = ., y = tabla_local %>%
-    select(gbifID, provincia, year, kingdom, species) %>%
-    filter(!is.na(provincia))) %>%
-  group_by(provincia, year, kingdom) %>%
+    select(gbifID, provincia, year, species) %>%
+    filter(!is.na(provincia)) %>%
+    filter(!(gbifID %in% tabla_coords$gbifID))
+  ) %>%
+  arrange(provincia, year)
+  
+
+rownames(gbif) <- NULL
+
+```
+
+
+Contamos con la tabla de observaciones de distintas especies, con su año y provincia asignados. Nuestro foco de estudio es la biodiversidad del territorio español.
+
+
+#### Índices de Biodiversidad
+
+Hay numerosas maneras en las que podemos enfocar nuestro estudio. Entre los índices de diversidad más comunes, podemos emplear:
+
+- **Riqueza específica**: se corresponde con el número de especies totales en un área. Es lo que se conoce como diversidad alfa, y será muy fácil calcularla con nuestros datos (*n_especies*).
+
+- **Índice de Shannon**: nos permite conocer la dominancia de ciertas especies en un ecosistema, teniendo en cuenta el número de individuos de esa especie en el área delimitada. Sin embargo, si bien podemos hacer agrupaciones que nos permitan obtener el número de ejemplares de una taxonomía determinada, esto se vuleve más complicado de cuantificar cuanto más nos acercamos a las poblaciones microbianas.
+
+- **Diversidad relativa**: la diversidad de una región sigue la regla *Species-Area Relationship*, es decir, es probable que, cuanto más territorio comprenda una provincia, mayor será su riqueza. Por ello, vemos necesario calcular una densidad de biodiversidad, que calcularemos como número de especies/km^2.
+
+- **Diversidad beta temporal**: estudia la variación de la diversidad en el tiempo. Nosotros lo estudiaremos con cada año, para tratar de establecer relaciones entre picosy depresiones de diversidad y las hospitalizaciones en la provincia.
+
+Empecemos con la creación de esta tabla final. Tomamos la tabla que hemos obtenido anteriormente y calculamos la cantidad de especies en cada territorio.
+
+```{r eval=FALSE}
+gbif_tabla <- gbif %>%
+  group_by(provincia, year) %>%
   summarise(n_especies = n_distinct(species))
 
+```
 
-# Tabla resumida disponible en JSON
-gbifJSON <- rjson::toJSON(gbif)
+
+Otro índice que podemos estudiar es la variabilidad en el número de especies de un año a otro. En todos los casos, la primera observación no va a tener año anterior al que restar, lo que devolverá NA. Ajustamos para que sea 0.
+
+```{r eval=FALSE}
+gbif_tabla <- gbif_tabla %>%
+  group_by(provincia) %>%
+  arrange(provincia, year) %>%
+  mutate(var_especies = dplyr::lag(n_especies) - n_especies,
+         var_especies = if_else(is.na(var_especies), 0, var_especies)) %>%
+  ungroup()
+
+
+gbif_tabla
+
+
+######
+######
+#### las tablas no se han hecho correctamente -- hay años 2000 con variación de especies por reino AHHHHHHH
+
+```
+
+
+#### ANEXO. Tabla base
+
+Para ahorrar tiempo y memoria a quien quiera ver esta información, todo este proceso de obtención y normalización de los datos se ha hecho con anterioridad, y la tabla resumida estará disponible en la carpeta **INPUT/GBIF** (*gbif_datos.json*). Esta será nuestra tabla base.
+
+```{r eval=FALSE}
+library(rjson)
+
+
+gbifJSON <- rjson::toJSON(gbif_tabla)
+
 write(x = gbifJSON, file = "INPUT/GBIF/gbif_datos.json")
 
 ```
 
 
-Hay diversas maneras de estudiar la biodiversidad de un territorio. Por un lado, podemos emplear la **riqueza específica**, el número de especies en un área. Es lo que se suele conocer como **diversidad alpha**.
+#### Estudio provincial de la biodiversidad
 
-Sin embargo, también puede ser útil examinar la **diversidad por kilómetro cuadrado**. Una mayor variedad de especies en un área menor de terriotrio puede tener más efecto en la población que si estuvieran más dispersas. 
+Ya tenemos nuestra tabla de diversidad básica. Vamos a estudiar una posible variación de la diversidad.
+
+La información relativa a la extensión territorial en kilómetros cuadrados de cada provincia la obtuvimos, en formato *pdf*, del **Ministerio de Agricultura, Pesca y Alimentación** (*MAPA*). Se encuentra disponible en la carpeta **INPUT/GBIF** (*extension_provincias.pdf*). 
 
 ```{r}
-# Tomamos la tabla que hemos obtenido anteriormente.
-# En primer lugar, calculamos la cantidad de especies en cada territorio
-gbif_tabla <- as.data.frame(fromJSON(file = "INPUT/GBIF/gbif_datos.json")) %>%
-  group_by(provincia, year) %>%
-  summarise(n_especies = sum(n_especies))
-
-
-# Ahora, obtenemos el área de cada provincia para poder calcular el índice de diversidad
+# Cargamos todos los paquetes necesarios para la lectura de los datos del pdf.
 library(pdftools)
 library(tidyverse)
 library(stringr)
 
+```
 
-# Lee las páginas del pdf una a una y las separa por filas
+Lee las páginas del pdf una a una y las separa por filas. La información correspondiente a las provincias está en las 3 primeras páginas del pdf.
+
+```{r}
 ficha_pdf <- pdf_text("INPUT/GBIF/extension_provincias.pdf") %>%
   str_split("\n")
 
-
-# La info correspondiente a las provincias está en la 3 primeras páginas del pdf
 ficha_provincias <- ficha_pdf[1:3]
 
+```
 
-# Vamos a unir todas las líneas de las páginas en un sólo vector 
-# Unlist: convierte lista anidada en un vector atómico
-# Eliminamos las lineas de la cabecera que no nos interesan, lineas en blanco y última linea que tampoco nos interesa
-# Eliminamos también las filas que están vacías
+
+Vamos a unir todas las líneas de las páginas en un sólo vector 
+
+- Unlist: convierte lista anidada en un vector atómico
+- Eliminamos las lineas de la cabecera que no nos interesan, lineas en blanco y última linea que tampoco nos interesa
+- Eliminamos también las filas que están vacías
+- Eliminamos la linea en la que indica la fuente
+
+```{r}
 lineas <- unlist(ficha_provincias)[-(1:10)]
+
 lineas <- lineas[trimws(lineas) != ""]
 
-
-# Eliminamos la linea en la que indica la fuente
 lineas_a_eliminar <- str_detect(lineas, "Fuente:")
+
 datos_provinciales <- lineas[!lineas_a_eliminar]
 
+```
 
-# Corregimos nombre que se había dividido en dos lineas
+
+Corregimos nombre que se había dividido en dos líneas y hacemos una limpieza de caracteres.
+
+```{r}
 datos_provinciales[40] <- "CASTILLA LA MANCHA            79.461       –     9.982   53.091   16.379    9" 
-datos_provinciales <- datos_provinciales[-41]
 
+datos_provinciales <- datos_provinciales[-41]
 
 datos_provinciales <- datos_provinciales %>% # <-- INICIAMOS LA TUBERÍA CON EL OBJETO
   # Reemplazar el guion ('–') por el valor faltante NA
@@ -198,20 +332,29 @@ datos_provinciales <- datos_provinciales %>% # <-- INICIAMOS LA TUBERÍA CON EL 
   str_replace_all("\\.", "")
 
 
-#  Limpieza de caracteres
 datos_finales <- datos_provinciales %>% 
   stringr::str_remove("^\\[\\d+\\].*?\\s+") %>%   # Quitar índices
   stringr::str_replace_all("–", "NA") %>%         # Reemplazar guiones por NA
   stringr::str_replace_all("\\.", "")             # Quitar puntos (miles)
 
+```
 
-# Separar cada línea por 2 o más espacios y convertir en data frame
+
+Separar cada línea por 2 o más espacios y convertir en dataframe.
+
+```{r}
 lista <- strsplit(datos_finales, "\\s{2,}")
+
 lista <- lapply(lista, function(x) x[x != ""])   # Quitar elementos vacíos
+
 df_provincias <- as.data.frame(do.call(rbind, lista), stringsAsFactors = FALSE)
 
+```
 
-#  Renombrar columnas y tipar
+
+Renombrar columnas y tipar:
+
+```{r}
 df_provincias <- df_provincias %>%
   rename(
     Provincia = V1,
@@ -223,8 +366,15 @@ df_provincias <- df_provincias %>%
   ) %>%
   mutate(across(Total_km2:Columna_D, ~ as.integer(.x)))
 
+
 df_provincias
 
+```
+
+
+Es necesario que, al estar trabajando con provincias, limpiemos esta tabla obtenida, así como normalizar los nombres para poder hacer la unión de las dos tablas. Quitamos todas las Comunidades Autónomas, que vienen marcadas por su formato en mayúscula, salvo aquellas uniprovinciales. Asimismo, renombramos todas aquellas cuyo nombre difiere al establecido por el INe que empleamos en la tabla anterior.
+
+```{r echo=TRUE}
 df_total <- select(df_provincias, Provincia,Total_km2) %>%
   filter(!(str_detect(Provincia, '[:upper:]') & !str_detect(Provincia, '[:lower:]') & !(Provincia %in% 
     c("BALEARES", "S C Tenerife", "P DE ASTURIAS", "CANTABRIA", "NAVARRA", "LA RIOJA", "MADRID", "R DE MURCIA")))) %>%
@@ -251,72 +401,221 @@ df_total <- select(df_provincias, Provincia,Total_km2) %>%
     )
   )
 
+
 df_total
-unique(gbif_tabla$provincia)
-
-# Unimos los dos dataframe y calculamos la diversidad por kilómetro cuadrado
-gbif_tabla <- gbif_tabla %>%
-  filter(!is.na(provincia)) %>%
-  left_join(df_total, by = c("provincia" = "Provincia")) %>%
-  mutate(indice_km2 = round(n_especies/Total_km2, digits = 3))
-
-unique(gbif_tabla$provincia)
-
-# APLICACIÓN SHINY
-# Lo guardaremos para la visualización
-gbifJSON <- rjson::toJSON(gbif_tabla)
-write(x = gbifJSON, file = "app_diversidad/DATA/gbifJSON.json")
 
 ```
 
 
-CUIDADO CON LOS NOMBRES, HAY VARIOS REPETIDOS!!!
-TEXTO INTRODUCTORIO DELAS HOSPITALIZACIONES!!!!!
+Sobre ese dataframe final, solo falta calcular el índice de diversidad por unidad territorial:
+
+```{r echo=TRUE}
+# Unimos los dos dataframe y calculamos la diversidad por kilómetro cuadrado
+gbif <- as.data.frame(fromJSON(file = "INPUT/GBIF/gbif_datos.json"))
+
+gbif_tabla <- gbif %>%
+  filter(!is.na(provincia)) %>%
+  left_join(df_total, by = c("provincia" = "Provincia")) %>%
+  mutate(indice_km2 = round(n_especies/Total_km2, digits = 3)) %>%
+  select(provincia, year, n_especies, var_especies, indice_km2)
+
+
+gbif_tabla
+
+```
+
+
+#### Mapa de Diversidad en España
+
+Toda esta información se encontrará, en un formato más amigable y de fácil acceso, en la aplicación de **Shiny** que dejaremos al final (*app_diversidad*).
 
 ```{r}
-#Data frame con las altas por diagnóstico y provincia desde 2000 a 2020
+#######
+#### ver como hacerlo en html --- sino no podemos hacer el knit
+
+library(shiny)
+library(leaflet)
+
+spain <- esp_get_prov()
+can <- esp_get_can_box()
+  
+gbif_local <- merge(spain, gbif_tabla, by.x = "ine.prov.name", by.y = "provincia")
+
+selectInput(
+  "var",
+  label = "Elige qué quiere visualizar:",
+  choices = list("Riqueza Específica", "Diversidad por kilómetro cuadrado")
+)
+sliderInput(
+  "year",
+  label = "Selecciona un año:",
+  min = 2000, max = 2020, value = 2010,
+  sep = ""
+)
+
+selectedYear <- reactive({
+  gbif_local %>%
+    filter(year == input$year)
+})
+output$especies <- renderText({
+  paste(sum(selectedYear()$n_especies), "especies")
+})
+renderLeaflet({
+  datos <- selectedYear()
+  variable <- switch(
+    input$var,
+    "Riqueza Específica" = datos$n_especies,
+    "Diversidad por kilómetro cuadrado"  = datos$indice_km2
+  )
+  datos$variable <- variable
+  dominio <- range(variable)
+  pal <- colorNumeric(palette = "Spectral", domain = dominio)
+  leaflet(datos) %>%
+    addProviderTiles("CartoDB.Positron") %>%
+    setView(lng = -3.5, lat = 40, zoom = 5) %>%
+    addPolygons(
+      fillColor = ~pal(variable),
+      weight = 1,
+      opacity = 1,
+      color = "white",
+      fillOpacity = 0.8,
+      label = ~paste0(ine.prov.name, ": ", variable, " especies"),
+      highlightOptions = highlightOptions(weight = 2, color = "#666", bringToFront = TRUE)
+    ) %>%
+    addLegend(
+      pal = pal,
+      values = dominio,
+      title = input$var,
+      position = "bottomright",
+      opacity = 1
+    )
+  })
+
+```
+
+
+
+### Datos sobre hospitalizaciones. Influencia de la edad
+
+Nuestra hipótesis radica en que, al convivir con una mayor diversidad ambiental, el sistema inmune de los habitantes de ese territorio están menos predispuestos a infecciones y enfermedades respiratorias.
+
+Los datos de las hospitalizaciones los obtuvimos de las **Encuentas de Morbilidad** del **Instituto Nacional de Estadística**. Tomaremos solo aquellos registros cuyo diagnóstico se corresponda con enfermedades, o bien de origen microbiano (infecciones bacterianas, fñungicas...), o bien del sistema respiratorio (alergias, asma...). 
+
+Las tablas que hemos tomado, que distinguen entre provincia, diagnóstico y número de pacientes, se encuentran disponibles en la carpeta **INPUT/datos_morbilidad/diagnostico** (*morb_20##*). Hay una tabla por cada año de estudio: desde el 2000 hasta el 2020.
+
+```{r}
+# Cargamos los paquetes necesarios para la lectura de archivos en formato PC Axis
+install.packages('pxR')
+
 library(pxR)
 library(dplyr)
 
-#Ruta incompleta para hacer bucle por año, dado que los archivos tienen como nombre: morb_año
+
+# Ruta incompleta para hacer bucle por año, dado que los archivos tienen como nombre: morb_año
 ruta <- "INPUT/datos_morbilidad/diagnostico/"
 
-#Vector de años
+# Vector de años
 años <- c(2000:2020)
 
-#Lista vacía donde ir almacenando los df de cada año
+# Lista vacía donde ir almacenando los df de cada año
 lista_df <- list()
 
-#bucle para importar datos de cada año
+```
+
+Adaptamos la tabla para la comparación:
+
+```{r}
+# Creamos un bucle para importar los datos de cada año
 for (año in años) {
   nombre_archivo <- paste0(ruta, "morb_",año,".px")
-  
   datos_anuales <- read.px(nombre_archivo)
   df_anual <- as.data.frame(datos_anuales)
-  
-#matches busca coincidencias en los nombres (varían nombres de las columnas según el año aunque se refieran a lo mismo)
+  # Matches busca coincidencias en los nombres (varían los nombres de las columnas según el año, aunque se refieran a lo mismo)
   df_anual <- df_anual %>%
-    rename(Grupo_edad = matches("Grupos.de.edad"),
-           Diagnostico_principal = matches("Diagnóstico"),
+    rename(Diagnostico_principal = matches("Diagnóstico"),
            Lugar_hospitalizacion = matches("Provincia"),
-           Altas = value)
-  
+           Altas = matches("value")
+    ) %>%
+    mutate(
+      Lugar_hospitalizacion = case_when(
+        str_detect(Lugar_hospitalizacion, "Álava|Araba|Alava|ALAVA") ~ "Araba/Álava",
+        str_detect(Lugar_hospitalizacion, "Albacete") ~ "Albacete",
+        str_detect(Lugar_hospitalizacion, "Alicante|Alacant") ~ "Alicante/Alacant",
+        str_detect(Lugar_hospitalizacion, "Almería|Almeria") ~ "Almería",
+        str_detect(Lugar_hospitalizacion, "Asturias|Asturies|Oviedo") ~ "Asturias",
+        str_detect(Lugar_hospitalizacion, "Ávila|Avila") ~ "Ávila",
+        str_detect(Lugar_hospitalizacion, "Badajoz") ~ "Badajoz",
+        str_detect(Lugar_hospitalizacion, "Barcelona|Barcelonés") ~ "Barcelona",
+        str_detect(Lugar_hospitalizacion, "Burgos") ~ "Burgos",
+        str_detect(Lugar_hospitalizacion, "Cáceres|Caceres") ~ "Cáceres",
+        str_detect(Lugar_hospitalizacion, "Cádiz") ~ "Cádiz",
+        str_detect(Lugar_hospitalizacion, "Cantabria|Cantabric|Santander") ~ "Cantabria",
+        str_detect(Lugar_hospitalizacion, "Castellón|Castelló") ~ "Castellón/Castelló",
+        str_detect(Lugar_hospitalizacion, "Ceuta") ~ "Ceuta",
+        str_detect(Lugar_hospitalizacion, "Ciudad Real") ~ "Ciudad Real",
+        str_detect(Lugar_hospitalizacion, "Córdoba|Cordoba") ~ "Córdoba",
+        str_detect(Lugar_hospitalizacion, "Coruña|coruña|Coruna|coruna") ~ "Coruña, A",
+        str_detect(Lugar_hospitalizacion, "Cuenca") ~ "Cuenca",
+        str_detect(Lugar_hospitalizacion, "Gerona|Girona") ~ "Girona",
+        str_detect(Lugar_hospitalizacion, "Granada") ~ "Granada",
+        str_detect(Lugar_hospitalizacion, "Guadalajara") ~ "Guadalajara",
+        str_detect(Lugar_hospitalizacion, "Guipúzcoa|Guipuzcoa|Gipuzkoa") ~ "Gipuzkoa",
+        str_detect(Lugar_hospitalizacion, "Huelva") ~ "Huelva",
+        str_detect(Lugar_hospitalizacion, "Huesca") ~ "Huesca",
+        str_detect(Lugar_hospitalizacion, "Baleares|Balearic|Balears|Menorca|Mallorca") ~ "Balears, Illes",
+        str_detect(Lugar_hospitalizacion, "Gran Canaria|Lanzarote|Gomera|Fuerteventura|Palma") ~ "Palmas, Las",
+        str_detect(Lugar_hospitalizacion, "Santa Cruz|Tenerife|Hierro") ~ "Santa Cruz de Tenerife",
+        str_detect(Lugar_hospitalizacion, "Jaén|Jaen") ~ "Jaén",
+        str_detect(Lugar_hospitalizacion, "Lléida|Lérida|LLeida|Lerida") ~ "Lleida",
+        str_detect(Lugar_hospitalizacion, "Lugo") ~ "Lugo",
+        str_detect(Lugar_hospitalizacion, "Madrid") ~ "Madrid",
+        str_detect(Lugar_hospitalizacion, "Málaga|Malaga") ~ "Málaga",
+        str_detect(Lugar_hospitalizacion, "Melilla") ~ "Melilla",
+        str_detect(Lugar_hospitalizacion, "Murcia") ~ "Murcia",
+        str_detect(Lugar_hospitalizacion, "Navarra|Nafarroa|Navarre|Pamplona") ~ "Navarra",
+        str_detect(Lugar_hospitalizacion, "Orense|Ourense") ~ "Ourense",
+        str_detect(Lugar_hospitalizacion, "Palencia") ~ "Palencia",
+        str_detect(Lugar_hospitalizacion, "Pontevedra|Pontevedro") ~ "Pontevedra",
+        str_detect(Lugar_hospitalizacion, "Rioja|Logroño|Logrono") ~ "Rioja, La",
+        str_detect(Lugar_hospitalizacion, "Salamanca") ~ "Salamanca",
+        str_detect(Lugar_hospitalizacion, "Segovia") ~ "Segovia",
+        str_detect(Lugar_hospitalizacion, "Sevilla") ~ "Sevilla",
+        str_detect(Lugar_hospitalizacion, "Soria") ~ "Soria",
+        str_detect(Lugar_hospitalizacion, "Tarragona|Alfacs|Fangar") ~ "Tarragona",
+        str_detect(Lugar_hospitalizacion, "Teruel") ~ "Teruel",
+        str_detect(Lugar_hospitalizacion, "Toledo") ~ "Toledo",
+        str_detect(Lugar_hospitalizacion, "Valencia") ~ "Valencia/València",
+        str_detect(Lugar_hospitalizacion, "Valladolid") ~ "Valladolid",
+        str_detect(Lugar_hospitalizacion, "Vizcaya|Bizcaya|Bizkaia|Viscay|Bilbao") ~ "Bizkaia",
+        str_detect(Lugar_hospitalizacion, "Zamora") ~ "Zamora",
+        str_detect(Lugar_hospitalizacion, "Zaragoza") ~ "Zaragoza",
+        str_detect(Lugar_hospitalizacion, "León|Leon") ~ "León"
+      )
+    )
   #Para añadir columna del año
   df_anual$Año <- año
-  
   lista_df[[as.character(año)]] <- df_anual
 }
 
-#Unir todos los data frames en uno
+
+# Finalmente, unimos todos los dataframes en uno
 df_total <- bind_rows(lista_df)
-df_total <- select(df_total,Lugar_hospitalizacion, Diagnostico_principal, Altas, Año) #La columna "Sexo" no nos interesa
 
 
-df_total
+df_total <- select(df_total, Año, Lugar_hospitalizacion, Diagnostico_principal, Altas) #La columna "Sexo" no nos interesa
+
 ```
 
 
-TEXTO DE DIAGNÓSTICOS POR GRUPOS DE EDAD!!!!
+Sin embargo, el estudio general de los afectados por estas patologías no nos aporta mucha información de la adaptación de la reacción inmunológica de cada población. Si bien puede darnos algún indicativo de esta evolución si se ven diferencias muy pronunciadas, no nos está informando de una mejoría en la población local.
+
+Por ello, tomaremos también como referencia los datos de morbilidad clasificados por provincia, diagnóstico y grupo de edad. El desarrollo del sistema inmune ocurre gran parte en nuestra infancia. La exposición a diversos agentes durante el crecimiento prepararía el organismo a enfrentarse a una mayor cantidad de antígenos, que puede ser representado por una mayor biodiversidad en la provincia de residencia.
+
+Si partimos de esta idea, en aquellas provincias más diversas veremos un mayor número de pacientes en edades temprana, que irá disminuyendo de forma representativa conparado con aquellos pacientes en su edad adulta.
+
+Todos los datos han sido recopilados también a través de las **Encuenstas de Morbilidad Anuales** de Altas Hospitalarias, disponibles también en el INe. Se adjuntan en la carpeta **INPUT/datos_morbilidad/grupo_edad** (*morb_20##*). 
+
+Sin embargo, estos datos solo está disponibles para un pequeño rango de años: del 2005 al 2015; no tenemos un volumen de candidatos a estudio lo suficientemente amplio como para hacer predicciones a futuro.
 
 ```{r}
 #Ruta incompleta para hacer bucle por año, dado que los archivos tienen como nombre: morb_año
@@ -349,48 +648,245 @@ for (año in años) {
 
 
 #Unir todos los data frames en uno
-df_total <- bind_rows(lista_df)
+df_edad <- bind_rows(lista_df) %>%
+  select(Año = año, Lugar_hospitalización, Diagnostico_principal, Grupo_edad, Altas)
 
 
-df_total
+#### TAMPOCO APARECE LLEIDA?????
+
+names(df_edad)
 
 ```
 
 
-Sin embargo, si bien podemos ver el lado positivo de la exposición a biodiversidad, como menor prevalencia de infecciones y alergias, podemos estudiar también el efecto que esta tiene en la necesidad y efectividad de medicamentos.
+### Datos de medicamentos anuales. Sistema Nacional de Salud
 
-Tomaremos datos sobre los diferentes fármacos consumidos cada año en cada región
+La mayoría de la población, ante una infección o aflicción menor, no requiere de estancias hospitalarias para tratarlas. Por ello, los datos obtenidos con anterioridad, si bien permiten estudiar la fuerza de la reacción que pueden provocar los patógenos de diferentes regiones, no aporta información real sobre la población.
+
+Por ello, hemos tomado datos del gasto anual en medicamentos en cada Comunidad Autónoma y año. Un gasto generalizado mayor en medicamentos puede ser indicativo de una mayor cantidad de pacientes, o de que los efectos protectores contra infección han sido por una mayor protección.
+
+Sin embargo, los datos de medicación solo están disponibles a partir de 2004 hasta 2018, pero debería ser suficiente para hacer un estudio preliminar.
 
 ```{r}
 # Cargamos los datos
-medicacion <- read.csv(file = "INPUT/Medicamentos/Recetas_facturadas_SNS.csv")
+library(readr)
+medicacion <- read.delim(file = "INPUT/Medicamentos/Recetas_facturadas_SNS.csv", sep = ",")
+unique(medicacion$CCAA)
 
 
-gbif_tabla <- gbif_tabla %>%
+# Nos fijamos que, contrario a los casos anteriores, esta vez no estamos trabajando con provincias, sino con comunidades autónomas. Por ello, en primer lugar, agruparemos los datos obtenidos en la tabla de biodiversidad.
+
+gbif_meds <- gbif_tabla %>%
   mutate(ccaa = case_when(
-    provincia %in% c("Almería", "Cádiz", "Córdoba", "Granada", "Huelva", "Jaén", "Málaga", "Sevilla") ~ "Andalucía",
-    provincia %in% c("Huesca", "Teruel", "Zaragoza") ~ "Aragón",
-    provincia %in% c("Asturias") ~ "Asturias, Principado de",
-    provincia %in% c("Balears, Illes") ~ "Balears, Illes",
-    provincia %in% c("Palmas, Las", "Santa Cruz de Tenerife") ~ "Canarias",
-    provincia %in% c("Cantabria") ~ "Cantabria",
-    provincia %in% c("Ávila", "Burgos", "León", "Palencia", "Salamanca", "Segovia", "Soria", "Valladolid", "Zamora") ~ "Castilla y León",
-    provincia %in% c("Albacete", "Ciudad Real", "Cuenca", "Guadalajara", "Toledo") ~ "Castilla-La Mancha",
-    provincia %in% c("Barcelona", "Girona", "Lleida", "Tarragona") ~ "Cataluña",
-    provincia %in% c("Alicante/Alacant", "Castellón/Castelló", "Valencia/València") ~ "Comunitat Valenciana",
-    provincia %in% c("Badajoz", "Cáceres") ~ "Extremadura",
-    provincia %in% c("Coruña, A", "Lugo", "Ourense", "Pontevedra") ~ "Galicia",
-    provincia %in% c("Madrid") ~ "Madrid, Comunidad de",
-    provincia %in% c("Murcia") ~ "Murcia, Región de",
-    provincia %in% c("Navarra") ~ "Navarra, Comunidad Foral de",
-    provincia %in% c("Araba/Álava", "Bizkaia", "Gipuzcoa") ~ "País Vasco",
-    provincia %in% c("Rioja, La") ~ "Rioja, La",
-    provincia %in% c("Ceuta") ~ "Ceuta",
-    provincia %in% c("Melilla") ~ "Melilla")
+    provincia %in% c("Almería", "Cádiz", "Córdoba", "Granada", "Huelva", "Jaén", "Málaga", "Sevilla") ~ "ANDALUCÍA",
+    provincia %in% c("Huesca", "Teruel", "Zaragoza") ~ "ARAGÓN",
+    provincia %in% c("Asturias") ~ "ASTURIAS",
+    provincia %in% c("Balears, Illes") ~ "BALEARES",
+    provincia %in% c("Palmas, Las", "Santa Cruz de Tenerife") ~ "CANARIAS",
+    provincia %in% c("Cantabria") ~ "CANTABRIA",
+    provincia %in% c("Ávila", "Burgos", "León", "Palencia", "Salamanca", "Segovia", "Soria", "Valladolid", "Zamora") ~ "CASTILLA Y LEÓN",
+    provincia %in% c("Albacete", "Ciudad Real", "Cuenca", "Guadalajara", "Toledo") ~ "CASTILLA - LA MANCHA",
+    provincia %in% c("Barcelona", "Girona", "Lleida", "Tarragona") ~ "CATALUÑA",
+    provincia %in% c("Alicante/Alacant", "Castellón/Castelló", "Valencia/València") ~ "COMUNIDAD VALENCIANA",
+    provincia %in% c("Badajoz", "Cáceres") ~ "EXTREMADURA",
+    provincia %in% c("Coruña, A", "Lugo", "Ourense", "Pontevedra") ~ "GALICIA",
+    provincia %in% c("Madrid") ~ "COMUNIDAD DE MADRID",
+    provincia %in% c("Murcia") ~ "MURCIA",
+    provincia %in% c("Navarra") ~ "NAVARRA",
+    provincia %in% c("Araba/Álava", "Bizkaia", "Gipuzcoa") ~ "PAÍS VASCO",
+    provincia %in% c("Rioja, La") ~ "LA RIOJA",
+    provincia %in% c("Ceuta") ~ "CEUTA",
+    provincia %in% c("Melilla") ~ "MELILLA")
   ) %>%
+  select(ccaa, year, indice_km2) %>%
+  left_join(medicacion, by = c("ccaa" = "CCAA", "year" = "Año")) %>%
+  filter(!is.na(Nº.de.Recetas.CNAC))
 
+gbif_meds
 
-medicacion
 
 ```
+
+## Resultados
+
+Contamos con todos los datos necesarios para la resolución de nuestras cuestiones. Trataremos de comprobar que las hipótesis que planteamos al comienzo pueden tener algún tipo de validez.
+
+### Evolución temporal de la riqueza específica en España
+
+Disponemos de los datos de diversidad de cada provincia por año, además de haber calculado su índice de diversidad relativa por su extensión territorial. Esto permite que comparemos la evolución tempora entre ellas, así como disponer de un gráfico que, de forma visual nos permita identificar aquellas provincias a estudio.
+
+Un modo fácil de visualizarlo es empleando un gráfico de área aplicada. Nos permite ver la evolución de una variable numérica (*indice_km2*) de varios grupos a través de los años. Cada provincia se identificará con un color para su mejor distinción.
+
+```{r}
+library(ggplot2)
+
+
+ggplot(gbif_tabla, aes(x = year, y = n_especies, fill = provincia)) +
+  geom_area(position = "identity") +
+  theme(legend.text = element_text(size = 7)) 
+  
+
+
+## MEJORAR VISUALIZACIÓN
+
+```
+
+A lo largo de estas últimas dos décadas, contrario a lo que sabemos lógicamente, el número de especies duplicadas prácticamente se ha duplicado. Aunque eso ya complica nuestros análisis a la hora de estudiar los efectos de la pérdida de biodiversidad en la salud humana, lo que de verdad nos importa es la variación de esta. 
+
+Seguramente, los procesos de identificación y registro se han hecho más exhaustivos con los años, incluyendo otras muchas organizaciones y esfuerzo en la identificación correcta de las especies.
+
+
+### Asociación entre la biodiversidad local y el número de pacientes con infección o enfermedad respiratoria
+
+Trataremos de establecer una relación entre la exposición de la población local a una mayor diversidad con un descenso significativo de las hospitalizaciones por infección. Para ello, contamos con las tablas obtenidas anteriormente:
+
+- gbif_tabla: contiene los datos relativos a los diversos índices de diversidad.
+- df_total: tabla que contiene las altas hospitalarias según diagnóstico, provincia y año.
+
+Uniremos las tabas de biodversidad con el número de hospitalizaciones por año y provincia, para así poder dibujar los gráficos e, idealmente, estabecer la relación deseada.
+
+```{r}
+df_total <- df_total %>%
+  group_by(Año, Lugar_hospitalizacion) %>%
+  summarise(Pacientes = sum(Altas, na.rm = TRUE)) %>%
+  select(Año, Lugar_hospitalizacion, Pacientes)
+
+
+df_casos <- gbif_tabla %>%
+  left_join(df_total, by = c("year" = "Año", "provincia" = "Lugar_hospitalizacion"))
+
+df_casos
+
+#### LLEIDA NO TIENE CASOS??????
+
+```
+
+
+Se puede establecer una primera relación general, estableciendo aquellas provincias con mayor índice de diversidad por kilómetro cuadrado total, comparado con los casos medios de infectados.  
+
+```{r}
+library(ggplot2)
+
+df_medias <- df_casos %>%
+  group_by(provincia) %>%
+  summarise(
+    media_km2 = mean(indice_km2, na.rm = TRUE),
+    media_pacientes = mean(Pacientes, na.rm = TRUE)
+  ) %>%
+  ungroup()
+
+df_medias
+```
+
+```{r}
+
+ggplot(df_medias, aes(x = media_km2, y = media_pacientes, color = provincia)) +
+  geom_point() +
+  geom_smooth(aes(group = 1), method = "lm")
+
+
+#### MIRAR COMO PODEMOS QUITAR EL MENSAJE DE ADVERTENCIA Y LABEL PARA VER ESPECÍFICAMENTE CADA PUNTO
+
+```
+
+
+En principio, se establece nuestra primera hipótesis como correcta: a mayor índice de diversidad, menor número de pacientes. Sin embargo, el gráfico no nos permite establecer definitivamente esta relación; hay valores extremos que distorsionan el comportamiento y análisis normal:
+
+- Ceuta y Melilla, con sus pequeñas extensiones territoriales, resultan en índices relativos de diversidad demasiado grandes en comparación con lo visto como normal.
+- Madrid, Barcelona y Valencia, siendo de las provincias con mayor demografía, lógicamente tienen muchos más casos de pacientes.
+
+En todo caso, si eliminamos estos puntos críticos, podemos ver la tendencia de forma más clara:
+
+```{r}
+df_recorte <- df_medias %>%
+  filter(!(provincia %in% c("Barcelona", "Madrid", "Valencia/València", "Melilla", "Ceuta")))
+
+ggplot(df_recorte, aes(x = media_km2, y = media_pacientes, color = provincia)) +
+  geom_point() +
+  geom_smooth(aes(group = 1), method = "lm")
+
+#### SERÁ MEJOR HACERLO CON LA TASA DE HOSPITALIZACIONES POR CADA 100000 HABITANTES
+
+```
+
+
+Al contrario a lo que esperábamos, quitando estos puntos críticos, la diversidad y los casos de infección y enfermedad respiratoria definen una relación positiva: a mayor exposición de la población a especies, son mayores los números de estos casos.
+
+No podemos establecer, con los datos actuales, que haya una relación entre la exposición a especies y el fortaliecimiento del sistema inmune. Sin embargo, podríamos estudiar si este impacto puede tener un impacto dependiendo de la edad de la población expuesta.
+
+
+### Desarrollo en la infancia de resistencia inmunitaria
+
+El desarrollo del sistema inmunitario en la infancia está muy influenciado por factores externos. Es el momento vital en el que se exponen por primera vez a múltiples alérgenos, que pueden impactar su futura sensibilidad. Tomando los valores de biodiversidad, así como las altas distinguidas por eddad, podemos construir un gráfico explicativo para ver la tendencia de este comportamiento.
+
+Si nuestra teoría es correcta, una mayor exposición a antígenos naturales llevará, por consiguiente, a un mayor número de casos de infección en la infancia, pero muy amortiguado en la edad adulta.
+
+Construimos la tabla necesaria para representar el gráfico:
+
+```{r}
+df_total <- df_edad %>%
+  group_by(Año, Lugar_hospitalización, Grupo_edad) %>%
+  summarise(Pacientes = sum(Altas, na.rm = TRUE)) %>%
+  select(Año, Lugar_hospitalización, Grupo_edad, Pacientes)
+
+
+df_casos <- gbif_tabla %>%
+  left_join(df_total, by = c("year" = "Año", "provincia" = "Lugar_hospitalización")) %>%
+  group_by(provincia, Grupo_edad) %>%
+  summarise(
+    media_km2 = mean(indice_km2, na.rm = TRUE),
+    media_pacientes = mean(Pacientes, na.rm = TRUE)
+  ) %>%
+  mutate(
+    Grupo_edad = case_when(
+      Grupo_edad %in% c("Menores de 1 año", "De 1 a 4 años", "De 5 a 9 años", "De 10 a 14 años") ~ "Infancia",
+      Grupo_edad %in% c("De 15 a 19 años", "De 20 a 24 años", "De 25 a 29 años") ~ "Juventud",
+      Grupo_edad %in% c("De 30 a 34 años", "	De 35 a 39 años", "De 40 a 44 años",
+                        "De 45 a 49 años", "De 50 a 54 años", "De 55 a 59 años") ~ "Adultez",
+      Grupo_edad %in% c("De 60 a 64 años", "	De 65 a 69 años", "De 70 a 74 años",
+                        "De 75 a 79 años", "De 80 a 84 años", "De 85 a 89 años",
+                        "De 90 a 94 años", "De 95 años y más") ~ "Ancianidad"
+    )
+  ) %>%
+  filter(!is.na(Grupo_edad)) %>%
+  group_by(provincia, Grupo_edad, media_km2) %>%
+  summarise(
+    media_pacientes = mean(media_pacientes)
+  )
+
+df_casos
+
+```
+
+
+```{r}
+ggplot(df_casos, aes(x = media_km2, y = media_pacientes, color = provincia)) +
+  geom_point() +
+  geom_smooth(aes(group = 1), method = "lm") +
+  facet_wrap(~ Grupo_edad)
+
+```
+
+
+La mayoría de los casos se dan en provincias con índices de diversidad más bajos, y el número de pacientes se va suavizando ligeramente a medida que avanzan en edad en las provincias de mayor biodiversidad. Obviamente, en la población más anciana, el número de pacientes vuelve a aumentar, siendo parte de los ciudadanos más vulnerables.
+
+Aunque se observe algo de variación, no es lo suficiente para decir, de forma definitiva, que haya tenido algun tipo de efecto protector sobre la población más joven.
+
+
+### Biodiversidad y consumo de fármacos
+
+Cada año, podemos estudiar la variación en el consumo de medicamen
+
+## Conclusiones
+
+Aunque la lógica y múltiples estudios hayan establecido una relación preliminar entre el desarrollo rodeado de una mayor diversidad y el fortalecimiento del sistema inmune, nos datos que hemos podido conseguir no nos ofrecen una relación real entre estas.
+
+- La evolución de la biodiversidad regional, desde un primer momento, no sigue la tendencia descrita en los estudios: parece duplicarse en vez de disminuir. Esto es perfectamente explicable con la propia fuente de datos; no han sido tan exhaustivos en la descripción del lugar de observación como deberían. Así, con el tiempo han documentado mejor estos registros, y nuestros filtros han podido detectar más especies en el renombrado que anteriormente.
+
+- La diversidad no parece tener un gran impacto en el número de pacientes atendidos 
+
+
+## Referencias
+
+
 
