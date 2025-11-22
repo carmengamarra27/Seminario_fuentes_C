@@ -429,7 +429,7 @@ gbif_tabla
 
 Toda esta información se encontrará, en un formato más amigable y de fácil acceso, en la aplicación de **Shiny** que dejaremos al final (*app_diversidad*).
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 #######
 #### ver como hacerlo en html --- sino no podemos hacer el knit
 
@@ -603,6 +603,12 @@ df_total <- bind_rows(lista_df)
 
 
 df_total <- select(df_total, Año, Lugar_hospitalizacion, Diagnostico_principal, Altas) #La columna "Sexo" no nos interesa
+
+```
+
+
+```{r}
+####### HACEMOS LOS PACIENTES POR POBLACION PORQUE NO CUADRA NADA
 
 ```
 
