@@ -1,6 +1,8 @@
 #Data frame con las altas por diagnóstico y provincia desde 2000 a 2020
 library(pxR)
 library(dplyr)
+library(stringr)
+library(tidyverse)
 
 #Ruta incompleta para hacer bucle por año, dado que los archivos tienen como nombre: morb_año
 ruta <- "INPUT/datos_morbilidad/diagnostico/"
@@ -100,15 +102,11 @@ View(df_total)
 
 
 #TABLA POBLACIÓN POR AÑO
-library(pxR)
-library(dplyr)
-library(stringr)
 poblacion <- read.px("INPUT/datos_morbilidad/datos_poblacion.px")
 df_pob <- as.data.frame(poblacion)
 
-df_anual <- df_anual %>%
-  rename(Poblacion = matches("value")
-  ) %>%
+df_anual <- df_pob %>%
+  rename(Poblacion = value) %>%
   mutate(
     Provincias = case_when(
       str_detect(Provincias, "Álava|Araba|Alava|ALAVA") ~ "Araba/Álava",
@@ -166,4 +164,4 @@ df_anual <- df_anual %>%
     )
   )
 
-View(df_pob)
+View(df_anual)
