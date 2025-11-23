@@ -13,7 +13,7 @@ Correlación entre la biodiversidad regional española y diversos indicadores de
 
 ## Introducción
 
-El desarrollo del sistema inmunológico está influenciado tanto por factores genéticos como ambientales. En 1989, los estudios de familias de Strachman (**CITAR AQUIIIIII**) le llevan a plantear la denominada *hipótesis de la higiene*, y sugiere que la exposición temprana a una mayor cantidad de microorganismos reforzaba al sistema inmunológico contra el desarrollo de alergias. En los años posteriores, estas investigaciones se extendieron al análisis de la relación entre biodiversidad, la microbiota humana y la persistencia de enfermedades inflamatorias (https://pmc.ncbi.nlm.nih.gov/articles/PMC3207110/).
+El desarrollo del sistema inmunológico está influenciado tanto por factores genéticos como ambientales. En 1989, los estudios de familias de Strachman (https://pmc.ncbi.nlm.nih.gov/articles/PMC1838109/) le llevan a plantear la denominada *hipótesis de la higiene*, y sugiere que la exposición temprana a una mayor cantidad de microorganismos reforzaba al sistema inmunológico contra el desarrollo de alergias. En los años posteriores, estas investigaciones se extendieron al análisis de la relación entre biodiversidad, la microbiota humana y la persistencia de enfermedades inflamatorias (https://pmc.ncbi.nlm.nih.gov/articles/PMC3207110/).
 
 Según esta teoría, los individuos que crecen en entornos con mayor diversidad de plantas, animales y microorganismos sufren una mayor exposición a antígenos naturales, lo que favorece el refuerzo del sistema inmune y reduce la vulnerabilidad ante patologías infecciosas y respiratorias.
 
@@ -1017,6 +1017,14 @@ En cualquier caso, solo hemos podido establecer una relación preliminar, con mu
 
 
 ## Referencias
+
+- Strachan DP. Hay fever, hygiene, and household size. BMJ. 1989 Nov 18;299(6710):1259-60. doi: 10.1136/bmj.299.6710.1259. PMID: 2513902; PMCID: PMC1838109. https://pmc.ncbi.nlm.nih.gov/articles/PMC1838109/
+
+- von Hertzen L, Hanski I, Haahtela T. Natural immunity. Biodiversity loss and inflammatory diseases are two global megatrends that might be related. EMBO Rep. 2011 Oct 28;12(11):1089-93. doi: 10.1038/embor.2011.195. PMID: 21979814; PMCID: PMC3207110. https://pmc.ncbi.nlm.nih.gov/articles/PMC3207110/
+
+- Haahtela T, Alenius H, Lehtimäki J, Sinkkonen A, Fyhrquist N, Hyöty H, Ruokolainen L, Mäkelä MJ. Immunological resilience and biodiversity for prevention of allergic diseases and asthma. Allergy. 2021 Dec;76(12):3613-3626. doi: 10.1111/all.14895. Epub 2021 May 24. PMID: 33959980. https://pubmed.ncbi.nlm.nih.gov/33959980/
+
+- Base de datos morbilidad: https://www.ine.es/dyngs/INEbase/operacion.htm?c=Estadistica_C&cid=1254736176778&menu=resultados&idp=1254735573175#_tabs-1254736194704
 
 
 
