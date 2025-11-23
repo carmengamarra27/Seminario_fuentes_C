@@ -2,8 +2,6 @@
 # Aplicación en Shiny para visualizaciones
 #
 
-# install.packages("highcharter")
-
 library(shiny)
 library(bslib)
 library(leaflet)
@@ -12,7 +10,9 @@ library(rjson)
 library(mapSpain)
 
 
-gbif_df <- as.data.frame(fromJSON(file = "DATA/gbifJSON.json"))
+#gbif_anual <- load("gbif_datos.Rdata")
+#gbif_meds <- load("gbif_meds.Rdata")
+#gbif_casos <- load("")
 
 spain <- esp_get_prov()
 can <- esp_get_can_box()
@@ -27,7 +27,7 @@ ui <- page_sidebar(
     selectInput(
       "var",
       label = "Elige qué quiere visualizar:",
-      choices = list("Riqueza Específica", "Diversidad por kilómetro cuadrado", "Hospitalizados")
+      choices = list("Riqueza Específica", "Diversidad por kilómetro cuadrado")
     ),
     sliderInput(
       "year",
@@ -40,7 +40,7 @@ ui <- page_sidebar(
     layout_columns(
       card("Total de Especies"),
       card("Total de Hospitalizados por Infección"),
-      card("Fármacos más Empleados"),
+      card("Consumo de Fármacos"),
       col_widths = c(3, 3, 5.5),
       row_heights = c(1, 1, 2)
     ),
@@ -70,7 +70,6 @@ server <- function(input, output){
       input$var,
       "Riqueza Específica" = datos$n_especies,
       "Diversidad por kilómetro cuadrado"  = datos$indice_km2
-      #"Hospitalizados"     = dat$pacientes
     )
     datos$variable <- variable
     dominio <- range(variable)
@@ -84,8 +83,7 @@ server <- function(input, output){
         opacity = 1,
         color = "white",
         fillOpacity = 0.8,
-        popup = ~paste0("<b>Provincia:</b> ", ine.prov.name, "<br>", 
-                        " · ", variable, " especies"),
+        label = ~paste0(ine.prov.name, ": ", variable, " especies"),
         highlightOptions = highlightOptions(weight = 2, color = "#666", bringToFront = TRUE)
       ) %>%
       addLegend(

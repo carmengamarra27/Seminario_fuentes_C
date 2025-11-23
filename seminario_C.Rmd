@@ -13,48 +13,52 @@ Correlación entre la biodiversidad regional española y diversos indicadores de
 
 ## Introducción
 
-El desarrollo del sistema inmunológico está influenciado tanto por factores genéticos como ambientales. En 1989, los estudios de familias de Strachman (https://pmc.ncbi.nlm.nih.gov/articles/PMC1838109/) le llevan a plantear la denominada *hipótesis de la higiene*, y sugiere que la exposición temprana a una mayor cantidad de microorganismos reforzaba al sistema inmunológico contra el desarrollo de alergias. En los años posteriores, estas investigaciones se extendieron al análisis de la relación entre biodiversidad, la microbiota humana y la persistencia de enfermedades inflamatorias (https://pmc.ncbi.nlm.nih.gov/articles/PMC3207110/).
+El desarrollo del sistema inmunológico está determinado tanto por factores genéticos como ambientales. En 1989, los estudios familiares realizados por Strachman (Strachan, 1989) le llevan a formular la denominada *hipótesis de la higiene*, que sugiere que la exposición temprana a un mayor número de microorganismos fortalece el sistema inmunológico y disminuye la susceptibilidad al desarrollo de alergias. En las décadas posteriores, esta línea de investigación se ha ampliado para incluir el análisis de la relación entre biodiversidad, microbiota humana y la persistencia de enfermedades inflamatorias (von Hertzen, 2011) (Haahtela, 2021).
 
-Según esta teoría, los individuos que crecen en entornos con mayor diversidad de plantas, animales y microorganismos sufren una mayor exposición a antígenos naturales, lo que favorece el refuerzo del sistema inmune y reduce la vulnerabilidad ante patologías infecciosas y respiratorias.
+De acuerdo con esta teoría, los individuos que se desarrollan en entornos con mayor diversidad de plantas, animales y microorganismos presentan una mayor exposición a antígenos naturales, lo que promueve el refuerzo del sistema inmune y reduce la vulnerabilidad frente a patologías infecciosas y respiratorias.
 
-En este proyecto, trataremos de explorar la relación entre la riqueza de especies de las provincias de España y la persistencia de ciertas enfermedades. Planteamos que la exposición a una mayor biodiversidad puede amortiguar las incidencias de infecciones y enfermedades respiratorias, jugando un papel crucial en el desarrollo inmunológico infantil. 
+Este proyecto tiene como objetivo explorar la relación entre la riqueza de especies de las provincias españolas y la incidencia de determinadas enfermedades. Se plantea que la exposición a una mayor biodiversidad puede contribuir a atenuar la incidencia de infecciones y enfermedades respiratorias, desempeñando un papel relevante en el desarrollo inmunológico durante la infancia. 
+
+Todos los archivos necesarios estarán disponibles en el repositorio GitHub, accesible a través de este [enlace](https://github.com/carmengamarra27/Seminario_fuentes_C).
 
 
 ## Objetivos
 
-Nuestro objetivo es estudiar la influencia de la biodiversidad regional de España en la inmunidad de sus habitantes, tomando en cuenta distintos indicadores de salud relacionados con la inmunidad humana.
+El objetivo general de este estudio es evaluar la influencia de la biodiversidad regional de España sobre la inmunidad de sus habitantes, considerando indicadores de salud relacionados con la función inmunológica.
 
-### Objetivos específicos
+### Objetivos Específicos
 
-- Analizar cómo la riqueza de especies por provincia varía con el tiempo, y su posible asociación con las hospitalizaciones por infección o enfermedad respiratoria.
-- Estudiar si es posible determinar la influencia de esta biodiversidad en el desarrollo infantil, distinguiendo los pacientes estudiados por gurpos de edad.
-- Analizar la relación entre la diversidad de especies por Comunidad Autónoma y el consumo de fármacos, intentando asociar una mayor exposición con un consumo menor de fármacos tipo antibióticos, antifúngicos, antihistamínicos...
+- Analizar la variación temporal de la riqueza de especies por provincia y su posible asociación con las hospitalizaciones por infección o enfermedades respiratorias.
+- Estudiar la potencial influencia de esta biodiversidad en el desarrollo infantil, distinguiendo los pacientes por grupos de edad.
+- Examinar la relación entre la diversidad de especies por Comunidad Autónoma y el consumo de fármacos, estudiando si una mayor exposición se asocia con un menor consumo de fármacos tipo antibióticos, antifúngicos, antihistamínicos...
 
 
 ## Metodología
 
-Nuestro estudio va a requerir, en esencia, de 4 tablas diferentes, que nos van a aportar información de los diferentes enfoques que tomar:
+El estudio se fundamenta, en esencia, en el tratamiento de cuatro conjuntos de datos principales, que aportan información desde distintos enfoques:
 
-- **Tabla de Biodiversidad**: va a contener la información relativa a la diversidad provincial de España, separada por año y estudiada por diferentes índices. Depende además de una tabla de **extensión territorial**.
-- **Tabla de Altas Hospitalarias**: contiene el número de pacientes, en cada provincia y año, hospitalizados con alguna de las patologías a estudio: infecciones bacterianas, por virus, enfermedades respiratorias... Una variante de estos datos lo encontraremos en la **Tabla de Altas por Grupo de Edad**, en el que distinguiremos aquellos pacientes según su etapa vital para hacer un estudio generacional.
-- **Tabla de Medicamentos**: engloba el registro de recetas prescritas cada año por comunidad autónoma.
+- **Tabla de Biodiversidad**: contiene información relativa a la diversidad provincial de España, desglosada por año y medida mediante diferentes índices de diversidad. Depende, además, de una **tabla de extensión territorial**.
 
-La edición de estas tablas base nos permitirá un estudio preliminar de la relación entre la diversidad local y los casos de enfermedad.
+- **Tabla de Altas Hospitalarias**: registra el número de pacientes, por provincia y año, hospitalizados con alguna de las patologías de interés: infecciones bacterianas, por virus, enfermedades respiratorias... Una variante de estos datos, la **Tabla de Altas por Grupo de Edad**, permite analizar la incidencia en distintas etapas de la vida.
+
+- **Tabla de Medicamentos**: recopila las prescripciones anuales de fármacos por Comunidad Autónoma.
+
+La integración y limpieza de estas tablas permitirá un análisis preliminar de la relación entre diversidad biológica local y ocurrencia de enfermedades.
 
 
-### Obtención de las tablas
+### Obtención de los Datos
 
-Requerimos de unas tablas base sobre las que comenzar nuestro estudio. Para ello, disponemos de diversas fuentes de datos que nos servirán de utilidad:
+Se han empleado diversas fuentes de datos oficiales para construir las tablas base:
 
-- Los datos de diversidad han sido obtenidos empleando el paquete *rgbif*, que conecta con la base de datos del **Sistema Global de Información sobre la Biodiversidad** a través de su API.
-- Los datos de morbilidad se obtuvieron de las distintas tablas estadísticas de *Altas Hospitalarias según el Sexo, el diagnóstico principal, la provincia, Comunidad y Ciudad autónoma de residencia*, a través del **Instituto Nacional de Estadística**. Cada tabla descargada representa un año. En aquellos años en los que se han distinguido los diagnósticos en cada grupo de edad, hemos tomado los datos de *Altas hospitalarias según el diagnóstico principal, grupos de edad quinquenales, la provincia, Comunidad y Ciudad autónoma de hospitalización*.
-- El **Sistema Nacional de Salud** provee, de forma anual, los *Datos de facturación con cargo a fondos públicos CC.AA. e INGESA*. En ella, se reúnen el número de facturas de medicamentos genéricos prescritos cada año en cada Comunidad Autónoma.
+- Los datos de diversidad se obtuvieron mediante el paquete *rgbif*, que conecta con la base de datos del **Sistema Global de Información sobre la Biodiversidad** a través de su API.
+- Para los datos de morbilidad, se utilizaron tablas estadísticas de *Altas Hospitalarias según el Sexo, el diagnóstico principal, la provincia, Comunidad y Ciudad autónoma de residencia*, disponibles a través del **Instituto Nacional de Estadística**. En aquellos años en los que se ha distinguido cada grupo de edad, se incorporaron los datos de *Altas hospitalarias según el diagnóstico principal, grupos de edad quinquenales, la provincia, Comunidad y Ciudad autónoma de hospitalización*.
+- El **Sistema Nacional de Salud** provee los *Datos de facturación con cargo a fondos públicos CC.AA. e INGESA*, donde se registran las recetas prescritas anualmente por cada Comunidad Autónoma.
 
-Todas ellas, tras su adaptación, nos dan datos relevantes en cuanto a indicadores básicos de la salud en la población, con una posible relación de la diversidad natural. 
+Tras su adaptación, estos conjuntos de datos permiten el estudio de varios indicadores clave de salud en la población en relación con la diversidad natural. 
 
-Antes de comenzar, debemos asegurarnos de tener instalados todos los paquetes necesarios para una edición correcta:
+Antes de proceder al análisis, es necesario asegurar la instalación y carga de todos los paquetes de R requeridos para la manipulación de datos:
 
-```{r}
+```{r message=TRUE, warning=TRUE}
 install.packages("tidyverse")
 install.packages("dplyr")
 install.packages("rgbif")
@@ -64,12 +68,11 @@ install.packages("pxR")
 install.packages("rjson")
 install.packages("pdftools")
 install.packages("readr")
+install.packages("ggplot2")
 
 ```
 
-... así como tenerlos cargados:
-
-```{r}
+```{r message=TRUE, warning=TRUE}
 library(tidyverse)
 library(rgbif)
 library(dplyr)
@@ -79,16 +82,16 @@ library(rjson)
 library(pdftools)
 library(pxR)
 library(readr)
+library(ggplot2)
 
 ```
 
 
 #### Datos sobre biodiversidad. GBIF
 
-*Se debe destacar que, debido al gran volumen de datos que conlleva su uso, se dejará marcado el método de descarga y resultados esperados. Sin embargo, no se incluirá la tabla base en el directorio "INPUT/GBIF" del proyecto. Solo se incluirá la tabla ya resumida, con los datos que resultan relevantes para nuestro trabajo.*
+*Se debe señalar que, debido al elevado volumen de datos involucrado, únicamente se documentará el procedimiento de descarga y los resultados esperados. Sin embargo, no se incluirá la tabla base completa en el directorio "INPUT/GBIF" del proyecto. Solo se incluirá la tabla ya resumida, con los datos que resultan relevantes para nuestro trabajo.*
 
-
-Una ocurrencia es la observación de una especie en un lugar y momento determinados. A través de la API del GBIF, obtendremos datos sobre las distintas ocurrencias en el territorio español entre los años 2000 y 2020. Asimismo, de todas las columnas proporcionadas en la descarga, tomaremos solo aquellas referidas a datos de localización e identificación de especies.
+Se entiende por **ocurrencia** la observación de una especie en un lugar y momento determinados. A través de la API de GBIF, se recuperarán los registros de ocurrencias en el territorio español entre los años 2000 y 2020. De entre todas las variables proporcionadas en la descarga, se seleccionarán únicamente aquellas referidas a datos de localización geográfica e identificación taxonómica.
 
 ```{r eval=FALSE}
 occ_download(
@@ -111,7 +114,7 @@ tabla_gbif <- occ_download_get(key = "0027295-251025141854904", path = "INPUT/GB
 
 ```
 
-Previo al filtrado, la tabla base que nos proporciona el GBIF tiene hasta 50 atributos por ocurrencia. Dado que, en el intervalo seleccionado se dan hasta 39 millones de ocurrencias, es lógico que el archivo completo no pueda ser soportado en memoria. Podemos ver un ejemplo resumido aquí:
+Previo al procesado, la tabla base proporcionada por el GBIF incluye hasta 50 atributos por registro. Dada la magnitud del intervalo seleccionado, se alcanzan aproximadamente 39 millones de ocurrencias, por lo que el archivo completo no es manejable en memoria. A continuación, se presenta una vista simplificada del formato original:
 
 ```{r}
 occ_search(
@@ -125,9 +128,9 @@ occ_search(
 
 #### Datos sobre hospitalizaciones. Diagnóstico y edad
 
-Nuestra hipótesis radica en que, al convivir con una mayor diversidad ambiental, el sistema inmune de los habitantes de ese territorio están menos predispuestos a infecciones y enfermedades respiratorias.
+Nuestra hipótesis plantea que la exposición a una mayor diversidad ambiental favorece la maduración del sistema inmune de los habitantes de ese territorio, reduciendo la predisposición a infecciones y patologías respiratorias.
 
-Las tablas que hemos tomado, que distinguen entre provincia, diagnóstico y número de pacientes, se encuentran disponibles en la carpeta **INPUT/datos_morbilidad/diagnostico** (*morb_20##*). Hay una tabla por cada año de estudio: desde el 2000 hasta el 2020. Por ello, será necesario unificar estos datos en una única tabla con la que podamos trabajar:
+Las tablas que recogen el número de pacientes hospitalizados, divididas por provincia y diagnóstico principal, se encuentran disponibles en la carpeta **INPUT/datos_morbilidad/diagnostico** (*morb_20##*). Se dispone de una tabla por cada año de estudio (2000 - 2020). Por tanto, será necesario unificar estas series anuales en un único conjunto de datos:
 
 ```{r}
 # Ruta incompleta para hacer bucle por año, dado que los archivos tienen como nombre: morb_año
@@ -171,13 +174,13 @@ df_casos
 ```
 
 
-Sin embargo, el estudio general de los afectados por estas patologías no nos aporta mucha información de la adaptación de la reacción inmunológica de cada población. Por ello, tomaremos también como referencia los datos de morbilidad clasificados por provincia, diagnóstico y grupo de edad. 
+Sin embargo, el estudio general de hospitalizaciones no nos aporta demasiada información de la adaptación de la reacción inmunológica en la población. Por este motivo, se incluirán también los datos de morbilidad clasificados por provincia, diagnóstico y grupo de edad. 
 
-El desarrollo del sistema inmune ocurre gran parte en nuestra infancia. La exposición a diversos agentes durante el crecimiento prepararía el organismo a enfrentarse a una mayor cantidad de antígenos, que puede ser representado por una mayor biodiversidad en la provincia de residencia.
+El desarrollo del sistema inmune ocurre fundamentalmente durante la infancia. La exposición temprana a antígenos ambientales proveería al organismo una mejor capacidad de respuesta inmunológica, especialmente en regiones con elevados niveles de biodiversidad.
 
-Si partimos de esta idea, en aquellas provincias más diversas veremos un mayor número de pacientes en edades temprana, que irá disminuyendo de forma representativa conparado con aquellos pacientes en su edad adulta.
+Partiendo de esta premisa, cabría esperar que provincias con mayor diversidad se observe un mayor número de pacientes en edades tempranas, acompañado de un descenso relativamente grande en edades adultas.
 
-Todos los datos estarán disponibles en la carpeta **INPUT/datos_morbilidad/grupo_edad** (*morb_20##*), aunque abarcan un periodo más corto que nuestro análisis original: desde el 2005 hasta el 2015.
+Todos estos datos se encuentran en la carpeta **INPUT/datos_morbilidad/grupo_edad** (*morb_20##*), y abarcan un intervalo ligeramente mñas reducido (2005 - 2015).
 
 ```{r}
 #Ruta incompleta para hacer bucle por año, dado que los archivos tienen como nombre: morb_año
@@ -222,28 +225,35 @@ df_edad
 
 #### Datos de medicamentos. SNS
 
-La mayoría de la población, ante una infección o aflicción menor, no requiere de estancias hospitalarias para tratarla. Por ello, los datos obtenidos con anterioridad, si bien permiten estudiar la fuerza de la reacción que pueden provocar los patógenos de diferentes regiones, no aporta información real sobre la población general.
+La mayoría de la población, ante una infección o aflicción menor, no requiere de estancias hospitalarias para tratarla. Por tanto, los datos obtenidos con anterioridad, si bien permiten estudiar la severidad de las afecciones que pueden provocar los patógenos de diferentes regiones, no representan adecuadamente la incidencia sobre la población general.
 
-Por ello, hemos tomado datos del gasto anual en medicamentos en cada Comunidad Autónoma y año. Un gasto generalizado mayor en medicamentos puede ser indicativo de una mayor cantidad de pacientes, o de que los efectos protectores contra infección han sido por una mayor protección**??????**.
+Por este motivo, se incorporarán también los datos del gasto anual en medicamentos en cada Comunidad Autónoma. Un gasto farmacéutico elevado puede ser indicativo de una mayor incidencia de afecciones tratadas o, por otro lado, una menor eficacia protectora del entorno.
 
-Sin embargo, los datos de medicación solo están disponibles a partir de 2004 hasta 2018, pero debería ser suficiente para hacer un estudio preliminar.
+Sin embargo, los datos de medicación solo están disponibles a partir de 2004 hasta 2018, pero debería ser suficiente para hacer un análisis complementario.
 
 ```{r}
 medicacion <- read.delim(file = "INPUT/Medicamentos/Recetas_facturadas_SNS.csv", sep = ",")
+
+medicacion
 
 ```
 
 
 ### Adaptación de los datos a nuestro estudio
 
-Para poder comparar las tablas entre sí, es necesario que igualemos el formato de atributos comunes estre ellas, tal sea este el nombre de las provincias, comunidades autónomas o años.
+Para poder integrar los conjuntos de datos, es imprescindible homogeneizar los atributos comunes estre las tablas, tal sea este el nombre de las provincias, comunidades autónomas o años de referencia.
 
 
 #### Tabla de Biodiversidad
 
-Cada ocurrencia está identificada geográficamente, o bien con un par de coordenadas, o bien con el nombre de la provincia en la que se ha registrado. Sin embargo, muchos de estos registros cuentan solo con uno de los métodos de identificación, si es que tienen alguno. Por ello, va a ser necesario estandarizar los datos de la tabla original descargada.
+Cada registro de ocurrencia está identificada geográficamente, ya sea mediante coordenadas o mediante el nombre de la provincia. Sin embargo, muchos de estos registros cuentan únicamente con uno de los métodos de identificación, si es que tienen alguno. Como consecuencia, será necesario estandarizar los datos de la tabla original descargada.
 
-Tomaremos por un lado, aquellos identificados por sus coordenadas espaciales, y por otro, los que pueden contar con el nombre de la provincia. Finalmente, los uniremos en una misma tabla, teniendo en cuenta la clave primaria que identifica estos registros (*gbifID*).
+Se generarán dos subconjuntos iniciales:
+
+- Registros identificados por sus coordenadas espaciales.
+- Registros con identificación provincial explícita. 
+
+Posteriormente, se unirán en una misma tabla, considerando como clave primaria el identificador *gbifID*.
 
 ```{r eval=FALSE}
 # Primero, tomamos aquellas filas que contengan información de coordenadas
@@ -336,17 +346,17 @@ rownames(gbif) <- NULL
 
 ```
 
-Esta tabla comprende datos sobre todas las observaciones de distintas especies en las provincias de España. Nuestro enfoque es ver cómo la presencia de estas especies puede afectar a la salud humana. Para ello, emplearemos distintos índices de diversidad:
+Esta tabla comprende datos sobre todas las observaciones de distintas especies en España, y será la base para el cálculo de métricas de diversidad provincial. Para ello, emplearemos distintos índices:
 
-- **Riqueza específica**: se corresponde con el número de especies totales en un área. Es lo que se conoce como diversidad alfa, y será muy fácil calcularla con nuestros datos (*n_especies*).
+- **Riqueza específica**: se corresponde con el número de especies totales en un área. Es lo que se conoce como diversidad alfa.
 
-- **Diversidad relativa**: la diversidad de una región sigue la regla *Species-Area Relationship* (**CITAR AQUÍ??????**), es decir, es probable que, cuanto más territorio comprenda una provincia, mayor será su riqueza. Por ello, vemos necesario calcular una densidad de biodiversidad, que calcularemos como número de especies/km^2.
+- **Diversidad relativa**: la diversidad de una región sigue la regla *Species-Area Relationship* (**CITAR AQUÍ??????**), es decir, es probable que, cuanto más territorio comprenda una provincia, mayor será su riqueza. Por ello, vemos necesario calcular una densidad de biodiversidad, que calcularemos como número de especies por km^2.
 
-- **Diversidad beta temporal**: estudia la variación de la diversidad en el tiempo. Nosotros lo estudiaremos con cada año, para tratar de establecer relaciones entre picosy depresiones de diversidad y las hospitalizaciones en la provincia.
+- **Diversidad beta temporal**: variación de la diversidad en el tiempo. Nosotros lo estudiaremos cada año, para evaluar fluctuaciones y su posible correlación con las hospitalizaciones.
 
-*Hay índices comúnmente empleados en el estudio de la biodiversidad de una zona, como el de Shannon o Simpson, que no pueden emplearse en nuestro estudio por la escasez de datos sobre el número de ejemplares observados de cada especie. Sin bien es uno de los campos que nos proporciona la tabla original de GBIF, la toma de esos datos no es muy rigurosa, estando en muchos casos vacío (NA). Por ello, solo emplearemos los índices más básicos de riqueza.*
+*Hay índices comúnmente empleados en el estudio de la biodiversidad de una zona, como el de Shannon o Simpson, que no pueden emplearse en este estudio por la ausencia de datos sobre la abundancia por especie. A pesar de constar en la tabla original de GBIF,este campo está muy incompleto. Por ello, se emplearán únicamente los índices más básicos de riqueza.*
 
-Trabajamos sobre la tabla creada anteriormente:
+Procedemos a trabajar sobre la tabla creada anteriormente:
 
 ```{r eval=FALSE}
 # Calculamos el número de especies distintas registradas cada año en cada provincia
@@ -372,9 +382,9 @@ write(x = gbifJSON, file = "INPUT/GBIF/gbif_datos.json")
 
 ```
 
-Algo que no hemos tenido en cuenta hasta el momento, es la extensión territorial de cada provincia: el mismo número de especies no va a afectar a la población igual si estas se encuentran muy dispersas por un gran área. Por ello, hemos visto conveniente la adición de este índice.
+Algo que no se ha considerado hasta el momento es la extensión territorial de cada provincia. El mismo número de especies no va a afectar a la población igual si estas se encuentran muy dispersas por un gran área. Por ello, se considera conveniente la adición de este índice para el ajuste.
 
-La información relativa a la extensión territorial en kilómetros cuadrados de cada provincia la obtuvimos, en formato *pdf*, del **Ministerio de Agricultura, Pesca y Alimentación** (*MAPA*). Se encuentra disponible en la carpeta **INPUT/GBIF** (*extension_provincias.pdf*).
+La información relativa a la extensión en kilómetros cuadrados de cada provincia fue obtenida, en formato *pdf*, a través del **Ministerio de Agricultura, Pesca y Alimentación** (*MAPA*). Se encuentra disponible en la carpeta **INPUT/GBIF** (*extension_provincias.pdf*).
 
 ```{r}
 # Lee las páginas del pdf una a una y las separa por filas
@@ -459,12 +469,12 @@ df_total <- select(df_provincias, Provincia, Total_km2) %>%
     )
   )
 
-
+   
 df_total
 
 ```
 
-Sobre ese dataframe final, solo falta calcular el índice de diversidad por unidad territorial que se añadirá como columna de la unión de esta nueva tabla con la tabla base de biodiversidad:
+Sobre ese dataframe resultante, solo falta calcular el índice de diversidad por unidad territorial, que se incluirá como nueva columna tras la unión de esta nueva tabla con la tabla de biodiversidad:
 
 ```{r echo=TRUE}
 # Unimos los dos dataframe y calculamos la diversidad por kilómetro cuadrado
@@ -484,9 +494,9 @@ gbif_tabla
 
 #### Tabla de Hospitalizaciones
 
-Al tomar datos de distintos años, el formato de provincia ha cambiado de tabla a tabla. Por ello, también requiere que adaptemos los nombres. Además, para poder comparar el número de pacientes en la provincia, va a ser necesario conocer que proporción de la población representan estos casos de hospitalización. Una de las tasas más empleadas en estudios demográficos es el número de casos por cada 100.000 habitantes.
+Al tomar datos de distintos años, el formato de denominación de las provincia varía entre tablas. Por ello, también requiere que adaptemos los nombres. Además, para poder comparar el número de pacientes entre territorios, va a ser necesario conocer qué proporción de la población representan dichos casos de hospitalización sobre la población total. La medida más habitual es la tasa de casos por cada 100.000 habitantes.
 
-Para ello, contamos con los datos de los censos anuales, *Población por provincias, edad (año a año), Españoles/Extranjeros, Sexo y Año*, disponibles a través del **Instituto Nacional de Estadística**.
+Para ello, contaremos con los datos de los censos anuales, *Población por provincias, edad (año a año), Españoles/Extranjeros, Sexo y Año*, disponibles a través del **Instituto Nacional de Estadística**.
 
 ```{r}
 # Creamos la tabla de población por provincia y año
@@ -625,7 +635,7 @@ df_casos
 
 #### Tabla de Diagnósticos por Grupos de Edad
 
-Haremos lo mismo que en el caso anterior: homogeneizamos los nombres de cada provincia y estudiamos el número de altas hospitalarias con respecto a la población provincial.
+Se seguirá el mismo procedimiento descrito en el caso anterior: estandarización de los nombres de cada provincia y cálculo de tasas ajustadas por población.
 
 ```{r}
 df_edades <- df_edad %>%
@@ -712,7 +722,7 @@ df_edades
 
 #### Tabla de Medicamentos
 
-Contrario a los casos anteriores, esta vez no estamos trabajando con provincias, sino con comunidades autónomas. Por ello, en primer lugar, agruparemos los datos obtenidos en la tabla de biodiversidad. Asím
+Contrario a los casos anteriores, la unidad territorial no es la provincia, sino la Comunidad Autónoma. Por tanto,será necesario agrupar previamente los datos de biodiversidad provincial a nivel autonómico.
 
 ```{r}
 gbif_meds <- gbif_tabla %>%
@@ -740,7 +750,7 @@ gbif_meds <- gbif_tabla %>%
   select(CCAA, Año, indice_km2) %>%
   dplyr::group_by(CCAA, Año) %>%          
   dplyr::summarise(indice_km2 = mean(indice_km2, na.rm = TRUE)) %>%
-  left_join(medicacion, by = c("CCAA", "Año")) %>%
+  full_join(medicacion, by = c("CCAA", "Año")) %>%
   filter(!is.na(Nº.de.Recetas.CNAC)) %>%
   arrange(Año, indice_km2)
 
@@ -752,41 +762,31 @@ gbif_meds
 
 ## Resultados
 
-Contamos con todos los datos necesarios para la resolución de nuestras cuestiones. Trataremos de comprobar que las hipótesis que planteamos al comienzo pueden tener algún tipo de validez.
+Una vez preparados todos los datos principales, es posible comprobar si las hipótesis planteadas al comienzo pueden tener algún tipo de validez.
 
 ### Evolución temporal de la riqueza específica en España
 
-Disponemos de los datos de diversidad de cada provincia por año, además de haber calculado su índice de diversidad relativa por su extensión territorial. Esto permite que comparemos la evolución tempora entre ellas, así como disponer de un gráfico que, de forma visual nos permita identificar aquellas provincias a estudio.
+El conjunto de datos disponible permite conocer la variación anual de la riqueza específica por provincia, así como el índice relativo ajustado por superficie. Esto permite la comparación de la evolución temporal entre ellas, así como la visualización mediante gráficos.
 
-Un modo fácil de visualizarlo es empleando un gráfico de área apilada. Nos permite ver la evolución de una variable numérica (*n_especies*) de varios grupos a través de los años. Cada provincia se identificará con un color para su mejor distinción.
+Una representación sencilla para un primer anáilisis es un gráfico de áreas apiladas, que permite observar la evolución de una variable numérica (*n_especies*) de varios grupos a través de los años. Cada provincia se identificará con un color para su mejor distinción.
 
 ```{r}
-library(ggplot2)
-
 ggplot(gbif_tabla, aes(x = Año, y = n_especies, fill = Provincia)) +
   ggtitle("Evolución de la Biodiversidad en España") +
   geom_area(alpha = 0.5, position = "identity") +
   theme(legend.text = element_text(size = 7)) 
-  
-
-
-## MEJORAR VISUALIZACIÓN
 
 ```
 
-A lo largo de estas últimas dos décadas, contrario a lo que sabemos lógicamente, el número de especies prácticamente se ha duplicado. Aunque eso ya complica nuestros análisis a la hora de estudiar los efectos de la pérdida de biodiversidad en la salud humana, lo que de verdad nos importa es la variación de esta. 
-
-Seguramente, los procesos de identificación y registro se han hecho más exhaustivos con los años, incluyendo otras muchas organizaciones y esfuerzo en la identificación correcta de las especies.
+Durante las dos últimas décadas se observa, de forma generalizada, que el número de especies prácticamente se ha duplicado. Este hecho, contrario a lo esperable, se explica probablemente por la mejora de los procesos de identificación y registro de los datos de biodiversidad, haciendo una labor más exhaustiva de recopilación de información.
 
 
 ### Asociación entre la biodiversidad local y el número de pacientes con infección o enfermedad respiratoria
 
-Trataremos de establecer una relación entre la exposición de la población local a una mayor diversidad con un descenso significativo de las hospitalizaciones por infección. Para ello, contamos con las tablas obtenidas anteriormente:
+Tratamos de vincular la exposición de la población local a una mayor diversidad con un descenso significativo de las hospitalizaciones por infección. Para ello, contamos con las tablas obtenidas anteriormente:
 
 - gbif_tabla: contiene los datos relativos a los diversos índices de diversidad.
 - df_total: tabla que contiene las altas hospitalarias según diagnóstico, provincia y año.
-
-Uniremos las tabas de biodiversidad con el número de hospitalizaciones por año y provincia, para así poder dibujar los gráficos e, idealmente, estabecer la relación deseada.
 
 ```{r}
 divers_casos <- df_casos %>%
@@ -810,10 +810,9 @@ divers_casos
 ```
 
 
-Se puede establecer una primera teoría, si estudiamos el comportamiento de la gráfica resultante al comparar los índices de diversidad con los casos de ciertas enfermedades.  
+Dibujamos el gráfico con los datos resultantes, con el que podemos estudiar si hay algún sesgo dependiendo del origen de la patología:  
 
-```{r}
-
+```{r warning=FALSE}
 ggplot(divers_casos, aes(x = indice_km2, y = Altas_100mil, fill = Diagnostico_principal)) +
   geom_area(position = "identity") +
   facet_wrap( ~ Diagnostico_principal) +
@@ -823,12 +822,11 @@ ggplot(divers_casos, aes(x = indice_km2, y = Altas_100mil, fill = Diagnostico_pr
 
 ```
 
+Un análisis preliminar sugiere que, para algunas patologías (enfermedades de la piel o del aparato digestivo), podría existir una relación inversa entre la riqueza específica y la tasa de hospitalización, confirmando nuestra primera hipótesis. No obstante, la relación no es lineal; hay una gran dispersión de valores independientemente de la relación establecida como deseada. 
 
-En principio, se establece nuestra primera hipótesis como correcta: podemos observar, por ejemplo, en las enfermedades de la piel o del aparato digestivo, una tendencia negativa conforme aumenta el grado de biodiversidad. Sin embargo, el gráfico no es de los más claros; no es una relación completamente directa, por lo que hay muchos valores del índice cuyas tasas de hospitalizados siguen siendo bajas, independientemente de la relación que queremos suponer. 
+Además, provincias con extensión muy reducida, como Ceuta y Melilla, tienen índices por kilómetro cuadrado excesivamente grandes con respecto al resto de España. Tras su exclusión, es posible observar tendencias más generales.
 
-Además, debemos tener en cuenta que provincias muy pequeñas como Ceuta y Melilla tienen índices por kilómetro cuadrado excesivamente grandes con respecto al resto de España. Podemos intentar quitar estos dos valores extremos para ver si se puede ajustar más los gráficos:
-
-```{r}
+```{r warning=FALSE}
 divers_casos <- df_casos %>%
   select(Año, Lugar_hospitalizacion, Diagnostico_principal, Altas_100mil) %>%
   full_join(gbif_tabla, by = c("Lugar_hospitalizacion" = "Provincia", "Año")) %>%
@@ -857,20 +855,18 @@ ggplot(divers_casos, aes(x = indice_km2, y = Altas_100mil, fill = Diagnostico_pr
 ```
 
 
-La eliminación de estos puntos críticos nos permite hacer un estudio más general del comportamiento de estas enfermedades en la población española. No solo se comprueba, a grandes rasgos, un descenso generalizado en las infecciones sistémicas, sino que nos permite comprender la tendencia de enfermedades según el microorganismo causante:
+Se comprueba, a grandes rasgos, un descenso generalizado en las infecciones sistémicas. Por tanto, se podría tomar la exposición ambiental a mayor número de antígenos como un factor a tener en cuenta en los procesos de infección.
 
-- Las infecciones bacterianas, contrario a lo esperado, tienen a aumentar cuanta mayor diversidad haya en el entorno de residencia. Desde un punto de vista biológico, esto puede cobrar sentido si tenemos en cuenta la capacidad de las bacterias a adaptarse al medio. Si el humano se vuelve resistente a una bacteria, esta no tardará mucho en cobrar nuevas características que, no dolo se adapten sobrevivir a un nuevo medio, sino que cobren mayor capacidad de infección.
-
-En cualquier caso, podemos continuar nuestro estudio con una idea preliminar de que se ha podido estableder una primitiva relación entre las dos variables.
+Asimismo, el comportamiento observado en el caso de las infecciones bacterianas muestra una tendecia opuesta: la incidencia tiene a aumentar cuanta mayor diversidad haya en el entorno de residencia. Esto cobra sentido si valoramos la capacidad de adaptación de las bacterias, y su frecuente proceso de mutación, que permite su elevada capacidad infecciosa.
 
 
 ### Desarrollo en la infancia de resistencia inmunitaria
 
-El desarrollo del sistema inmunitario en la infancia está muy influenciado por factores externos. Es el momento vital en el que se exponen por primera vez a múltiples alérgenos, que pueden impactar su futura sensibilidad. Tomando los valores de biodiversidad, así como las altas distinguidas por edad, podemos construir un gráfico explicativo para ver la tendencia de este comportamiento.
+Dado que el desarrollo del sistema inmunitario ocurre principalmente durante la infancia, se analizó la evolución de las tasas de hospitalización desagregadas por grupo de edad.
 
-Si nuestra teoría es correcta, una mayor exposición a antígenos naturales llevará, por consiguiente, a un mayor número de casos de infección en la infancia, que se verás significantemente amortiguadas en la edad adulta.
+Si nuestra hipótesis fuera correcta, una mayor exposición a antígenos naturales (regiones de alta biodiversidad) llevará, por consiguiente, a un mayor número de casos de infección en edades tempranas, acompañadas de una disminución significativa en adultos.
 
-Una misma provincia tiene, año a año, más o menos el mismo índice de diversidad. Por ello, la exposición en la población no ha variado demasiado como para tener una diferencia sustancial. Por ello, hacemos una tabla que relacione cada provincia con su índice medio de diversidad por kilómetro cuadrado, con el número medio de pacientes por cada 100.000 habitantes.
+Una misma provincia tiene, año a año, aproximadamente el mismo índice de diversidad. Por ello, se creará una tabla que relacione cada provincia con su índice medio por kilómetro cuadrado, con el número medio de pacientes por cada 100.000 habitantes.
 
 ```{r}
 df_medias <- df_edades %>%
@@ -910,7 +906,7 @@ ggplot(orden, aes(x = Lugar_hospitalizacion, y = Pacientes, fill = Grupo_edad)) 
 ```
 
 
-Quitando la excepción que es León, que puede haber sido causada por problemas en el renombrado (detectar *Castilla y León* como *León*), es posible ver de forma muy visual los grupos de edad más afectados en cada provincia. Puede servir para una observación más clara de las diferencias, eliminar este valor anormal de la gráfica:
+Quitando la excepción que es León, que puede haber sido causada por problemas en el renombrado (detectar *Castilla y León* como *León*), para una observación más clara de las diferencias:
 
 ```{r}
 orden <- orden %>%
@@ -921,17 +917,16 @@ geom_bar(position = "stack", stat = "identity") +
 coord_flip()
 ```
 
-Independientemente de que sea más fácil de analizar, esta gráfica solo confirma nuestra sospecha: no se puede detectar un efecto amortiguador en cada etapa vital. Salvo es provincias con índice muy altos, como Ceuta y Melilla en las que la diferencia entre los enfermos en edad adulta difieren significativamente de los niños y jóvenes, no podemos ver una diferencia importante entre estos en el resto del país.
+El análisis consolida la conclusión contraria: no se pueden observar patrones que indiquen un efecto amortiguador entre etapas vitales. Las únicas excepciones notables corresponden a territorios con valores extremadamente altos de diversidad relativa (Ceuta y Melilla).
 
-Por tanto, no podemos concluir que la exposición ambientas a más patógenos no implica un refuerzo del sistema inmunitario en la infancia y, por consiguiente, las mejoras en los prospectos de salud de la población local.
+Por tanto, no podemos concluir que la exposición prolongada a ambientes biodiversos desarrolle mejores prospectos de salud en la población local.
 
 
 ### Biodiversidad y consumo de fármacos
 
-Cada año, podemos estudiar la variación en el consumo de medicamentos por cada comunidad autónoma, que puede establecer una relación entre la diversidad y el estado de salud de la población local común. Las enfermedades respiratorias e infecciones no suelen requerir mayor intervención que la receta de un medicamento, por lo que estudiando esto, podemos ver si existe una correlación.
+Cada año, podemos estudiar la variación en el consumo de medicamentos por cada comunidad autónoma, que puede establecer una relación entre la diversidad y el estado de salud de la población local común.
 
-Tomaremos, por ejemplo, el año 2013 (*se podrá visualizar más libremente la variación de año a año en la aplicación de Shiny*). Contamos con las tablas de diversidad divididas por año y comunidad autónoma, así como el número de recetas mandadas ese mismo año. Dibujamos el gráfico ordenando las comunidades por su índice de riqueza específica por kilómetro cuadrado, y lo comparamos con el número de medicamentos prescritos en ese mismo año:
-
+Tomaremos, por ejemplo, el año 2013 (*se podrá visualizar más libremente la variación de año a año en la aplicación de Shiny*). Dibujamos el gráfico ordenando las comunidades por su índice de riqueza específica por kilómetro cuadrado, y lo comparamos con el número de medicamentos prescritos en ese mismo año:
 
 ```{r}
 gbif_meds %>%
@@ -962,11 +957,13 @@ gbif_meds %>%
   )
 ```
 
-No solo podemos ver que no hay correlación entre la biodiversidad y el consumo de medicamentos, sino que, si tenemos en cuenta que las comunidades están ordenadas de menor a mayor índice, este consumo se hace mayor a medida que aumenta la diversidad. Ahora bien, tengamos en cuenta las limitaciones de nuestro análisis:
+Es posible ver que no existe una correlación clara entre la biodiversidad y el consumo de medicamentos; incluso podemos considerar por el gráfico que este consumo se hace mayor a medida que aumenta la diversidad. 
 
-- Estudiamos el consumo de fármacos de uso general; no estamos diferenciando entre antibióticos, antihistamínicos, antifúngico... que serían los más relacionados con nuestro tema central. Por tanto, si en una población se prescriben, por ejemplo, mayor número de medicaciones para el corazón, esto se verá también reflejado.
+Ahora bien, este patrón puede verse afectado por múltiples factores que limitan el analisis:
 
-- No se ha tenido en cuenta la población de las comunidades a la hora de estudiar el número de recetas. Por tanto, Ceuta y Melilla, con menos población, tienen un consumo bastante más bajo que, digamos, la Comunidad de Madrid.
+- Ausencia de distinción por categoría terapéutica (antibióticos, antifúngicos, antihistamínicos...), que serían los medicamentos relacionados con nuestro tema central.
+
+- Ausencia de ajuste por población.
 
 - Solo se está estudiando, en este momento, un año. Sin embargo, si empleamos otro periodo un poco alejado:
 
@@ -998,22 +995,22 @@ gbif_meds %>%
         axis.text.y = element_text(size = 6)
   )
 ```
-... vemos que tampoco hay mucha diferencia. 
+... vemos que tampoco hay hace una gran diferencia. 
 
-Por tanto, nuestro estudio a partir del volumen de fármacos consumido por Comunidad Autónoma no es un método válido para validar nuestra hipótesis.
+Por tanto, el estudio a partir del volumen de fármacos consumido por Comunidad Autónoma no es un método concluyente para probar nuestra última hipótesis.
 
 
 ## Conclusiones
 
-Tras el tratamiento de los diferentes datos, podemos evaluar nuestro estudio según lo que hemos podido concluir:
+A partir del procesamiento de los datos disponibles, es posible extraer las siguentes conclusiones generales sobre nuestro estudio:
 
-- Los datos aportados por el GBIF no han sido lo suficientemente rigurosos como para poder apreciar el descenso de la biodiversidad en el territorio español. Sin embargo, a través del mapa proporcionado en la **aplicación Shiny**, sí que podemos denotar un incremento importante en las provincias con costa en el Mediterráneo, contrario a las del interior peninsular. 
+- Los datos aportados por el GBIF no permiten, en su estado actual, evaluar adecuadamente la pérdida de biodiversidad en el territorio español. Sin embargo, el análisis geográfico a través del mapa proporcionado en la **aplicación Shiny** denota un incremento marcado de ocurrencias en las provincias de la costa del Mediterráneo. 
 
-- Es posible que haya una relación entre la exposición prolongada a un ambiente de mayor riqueza específica, y el desarrollo de una resistencia ante infecciones. Sin embargo, no es una relación directa: el fortalecimiento del sistema inmune depende de muchos otros factores que compromenten esta asociación.
+- Los resultados sugieren la posible existencia de una relación entre la exposición prolongada a un ambiente de mayor riqueza específica, y el desarrollo de resistencia ante infecciones. Sin embargo, no es una relación directa: el fortalecimiento del sistema inmune depende de múltiples factores que compromenten esta asociación directa.
 
-- El consumo de medicamentos no es una variable válida para el estudio del impacto de la biodiversidad en la salud. Debe estudiarse con fármacos específicos relevantes para las categorías que estamos tratando. De ahí, podríamos estudiar, por ejemplo, si una mayor diversidad fortalece nuestra microbiota y, por tanto, en aquellas comunidades se desarrolla una resistencia a los antibióticos (requieren unos de mayor gramaje o con periodos de consumo más extendido).
+- El volumen de medicamentos consumidos anualmente no constituye un indicador válido para evaluar el impacto de la biodiversidad sobre la salud, salvo que se restrinja a grupos farmacológicos concretos relacionados con la funciñón inmunitaria. De ahí, podría estudiarse, por ejemplo, si una mayor diversidad fortalece la microbiota y, por tanto, en aquellas comunidades más expuestas se desarrolla una resistencia a los antibióticos (requieren unos de mayor dosis o con periodos de consumo más extendido).
 
-En cualquier caso, solo hemos podido establecer una relación preliminar, con muchas limitaciones y sin una asociación directa. Solo puede servir como comienzo de un estudio más complejo, con datos más detallados y extendidos en el tiempo.
+En resumen, solo ha sido posible establecer una asociación preliminar, débil y no concluyente. Este trabajo solo puede servir como base para estudio más complejo, con datos más detalllados y con mayor alcance temporal.
 
 
 ## Referencias
@@ -1025,6 +1022,5 @@ En cualquier caso, solo hemos podido establecer una relación preliminar, con mu
 - Haahtela T, Alenius H, Lehtimäki J, Sinkkonen A, Fyhrquist N, Hyöty H, Ruokolainen L, Mäkelä MJ. Immunological resilience and biodiversity for prevention of allergic diseases and asthma. Allergy. 2021 Dec;76(12):3613-3626. doi: 10.1111/all.14895. Epub 2021 May 24. PMID: 33959980. https://pubmed.ncbi.nlm.nih.gov/33959980/
 
 - Base de datos morbilidad: https://www.ine.es/dyngs/INEbase/operacion.htm?c=Estadistica_C&cid=1254736176778&menu=resultados&idp=1254735573175#_tabs-1254736194704
-
 
 
