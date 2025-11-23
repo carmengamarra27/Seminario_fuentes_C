@@ -1,11 +1,14 @@
 ---
 title: "Biodiversidad e Inmunidad Humana"
 author: "Carmen Gamarra Valenciano, Itsaso Madrigal Román"
-date: "Sys.Date()"
-output: 
+date: Sys.Date()
+output:
+  html_document:
+    toc: true
+    df_print: paged
   html_notebook:
-    toc: TRUE
-    toc_float: TRUE
+    toc: true
+    toc_float: true
 ---
 
 Correlación entre la biodiversidad regional española y diversos indicadores de salud en la población local.
@@ -58,7 +61,7 @@ Tras su adaptación, estos conjuntos de datos permiten el estudio de varios indi
 
 Antes de proceder al análisis, es necesario asegurar la instalación y carga de todos los paquetes de R requeridos para la manipulación de datos:
 
-```{r message=TRUE, warning=TRUE}
+```{r eval=FALSE, include=TRUE}
 install.packages("tidyverse")
 install.packages("dplyr")
 install.packages("rgbif")
@@ -72,7 +75,7 @@ install.packages("ggplot2")
 
 ```
 
-```{r message=TRUE, warning=TRUE}
+```{r message=FALSE, warning=FALSE}
 library(tidyverse)
 library(rgbif)
 library(dplyr)
@@ -100,8 +103,6 @@ occ_download(
   pred("country", "ES"),
   format = "SIMPLE_CSV"
 )
-
-"GBIF Occurrence Download https://doi.org/10.15468/dl.xrsgzw Accessed from R via rgbif (https://github.com/ropensci/rgbif) on 2025-11-11"
 
 occ_download_wait("0027295-251025141854904")
 
@@ -132,7 +133,7 @@ Nuestra hipótesis plantea que la exposición a una mayor diversidad ambiental f
 
 Las tablas que recogen el número de pacientes hospitalizados, divididas por provincia y diagnóstico principal, se encuentran disponibles en la carpeta **INPUT/datos_morbilidad/diagnostico** (*morb_20##*). Se dispone de una tabla por cada año de estudio (2000 - 2020). Por tanto, será necesario unificar estas series anuales en un único conjunto de datos:
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 # Ruta incompleta para hacer bucle por año, dado que los archivos tienen como nombre: morb_año
 ruta <- "INPUT/datos_morbilidad/diagnostico/"
 
@@ -182,7 +183,7 @@ Partiendo de esta premisa, cabría esperar que provincias con mayor diversidad s
 
 Todos estos datos se encuentran en la carpeta **INPUT/datos_morbilidad/grupo_edad** (*morb_20##*), y abarcan un intervalo ligeramente mñas reducido (2005 - 2015).
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 #Ruta incompleta para hacer bucle por año, dado que los archivos tienen como nombre: morb_año
 ruta <- "INPUT/datos_morbilidad/grupo_edad/"
 
@@ -255,7 +256,7 @@ Se generarán dos subconjuntos iniciales:
 
 Posteriormente, se unirán en una misma tabla, considerando como clave primaria el identificador *gbifID*.
 
-```{r eval=FALSE}
+```{r eval=FALSE, message=FALSE, warning=FALSE}
 # Primero, tomamos aquellas filas que contengan información de coordenadas
 tabla_coords <- tabla_gbif %>%
   select(gbifID, year, decimalLatitude, decimalLongitude, species) %>%
@@ -358,7 +359,7 @@ Esta tabla comprende datos sobre todas las observaciones de distintas especies e
 
 Procedemos a trabajar sobre la tabla creada anteriormente:
 
-```{r eval=FALSE}
+```{r eval=FALSE, message=FALSE, warning=FALSE}
 # Calculamos el número de especies distintas registradas cada año en cada provincia
 gbif_tabla <- gbif %>%
   group_by(provincia, year) %>%
@@ -376,7 +377,7 @@ gbif_tabla <- gbif_tabla %>%
 
 Esta tabla ya tiene un tamaño correcto para poder guardarse como fichero en GitHub, por lo que la importamos a nuestro directorio:
 
-```{r eval=FALSE}
+```{r eval=FALSE, message=FALSE, warning=FALSE}
 gbifJSON <- rjson::toJSON(gbif_tabla)
 write(x = gbifJSON, file = "INPUT/GBIF/gbif_datos.json")
 
@@ -488,6 +489,9 @@ gbif_tabla <- gbif %>%
 
 
 gbif_tabla
+
+# Para su uso en la aplicación Shiny
+save(gbif_tabla, file = "INPUT/DATA/gbif_tabla.Rdata")
 
 ```
 
@@ -630,6 +634,9 @@ df_casos <- df_casos %>%
 
 df_casos
 
+# Para Shiny
+save(df_casos, file = "INPUT/DATA/tabla_casos.Rdata")
+
 ```
 
 
@@ -718,8 +725,6 @@ df_edades
 ```
 
 
-
-
 #### Tabla de Medicamentos
 
 Contrario a los casos anteriores, la unidad territorial no es la provincia, sino la Comunidad Autónoma. Por tanto,será necesario agrupar previamente los datos de biodiversidad provincial a nivel autonómico.
@@ -756,6 +761,9 @@ gbif_meds <- gbif_tabla %>%
 
 
 gbif_meds
+
+# Para Shiny
+save(gbif_meds, file = "INPUT/DATA/gbif_meds.Rdata")
 
 ```
 
@@ -809,7 +817,6 @@ divers_casos
 
 ```
 
-
 Dibujamos el gráfico con los datos resultantes, con el que podemos estudiar si hay algún sesgo dependiendo del origen de la patología:  
 
 ```{r warning=FALSE}
@@ -854,7 +861,6 @@ ggplot(divers_casos, aes(x = indice_km2, y = Altas_100mil, fill = Diagnostico_pr
 
 ```
 
-
 Se comprueba, a grandes rasgos, un descenso generalizado en las infecciones sistémicas. Por tanto, se podría tomar la exposición ambiental a mayor número de antígenos como un factor a tener en cuenta en los procesos de infección.
 
 Asimismo, el comportamiento observado en el caso de las infecciones bacterianas muestra una tendecia opuesta: la incidencia tiene a aumentar cuanta mayor diversidad haya en el entorno de residencia. Esto cobra sentido si valoramos la capacidad de adaptación de las bacterias, y su frecuente proceso de mutación, que permite su elevada capacidad infecciosa.
@@ -881,6 +887,8 @@ df_medias <- df_edades %>%
     by = c("Lugar_hospitalizacion" = "Provincia")
   ) %>%
   arrange(desc(Índice_medio))
+
+df_medias
   
 # Ver las provincias con mayores índices de biodiversidad
 ordenadas <- df_medias %>%
@@ -888,10 +896,7 @@ ordenadas <- df_medias %>%
   dplyr::summarise(Índice_medio = mean(Índice_medio)) %>%
   arrange(desc(Índice_medio))
 
-ordenadas
-
 ```
-
 
 ```{r}
 # Queremos mantener el orden según el índice de diversidad
@@ -904,7 +909,6 @@ ggplot(orden, aes(x = Lugar_hospitalizacion, y = Pacientes, fill = Grupo_edad)) 
   coord_flip()
 
 ```
-
 
 Quitando la excepción que es León, que puede haber sido causada por problemas en el renombrado (detectar *Castilla y León* como *León*), para una observación más clara de las diferencias:
 
@@ -995,7 +999,8 @@ gbif_meds %>%
         axis.text.y = element_text(size = 6)
   )
 ```
-... vemos que tampoco hay hace una gran diferencia. 
+
+... vemos que tampoco hace una gran diferencia. 
 
 Por tanto, el estudio a partir del volumen de fármacos consumido por Comunidad Autónoma no es un método concluyente para probar nuestra última hipótesis.
 
@@ -1021,9 +1026,10 @@ En resumen, solo ha sido posible establecer una asociación preliminar, débil y
 
 - Haahtela T, Alenius H, Lehtimäki J, Sinkkonen A, Fyhrquist N, Hyöty H, Ruokolainen L, Mäkelä MJ. Immunological resilience and biodiversity for prevention of allergic diseases and asthma. Allergy. 2021 Dec;76(12):3613-3626. doi: 10.1111/all.14895. Epub 2021 May 24. PMID: 33959980. https://pubmed.ncbi.nlm.nih.gov/33959980/
 
+- Base de datos morbilidad: https://www.ine.es/dyngs/INEbase/operacion.htm?c=Estadistica_C&cid=1254736176778&menu=resultados&idp=1254735573175#_tabs-1254736194704
+
 - Comité Científico de la Agencia Española de Seguridad Alimentaria y Nutrición (AESAN), Díaz Perales, A., Aguilera García, C.M., Bretón Lesmes, I., Gil Izquierdo, A., Nieto Martínez, G., Rivas Velasco, A.M., Sánchez Mata, M-C. (2023). Informe del comité científico de la agencia española de seguridad alimentaria y nutrición (AESAN) sobre los efectos del cambio climático en la alergia alimentaria. Revista del Comité Científico de la AESAN, 38, 25-44. 
 
-- Instituto Nacionall de Estadística. Estadística sobre actividades de Investigación y Desarrollo. https://www.ine.es/dyngs/INEbase/operacion.htm?c=Estadistica_C&cid=1254736176778&menu=resultados&idp=1254735573175#_tabs-1254736194704
-
+- Instituto Nacional de Estadística. Estadística sobre actividades de Investigación y Desarrollo. https://www.ine.es/dyngs/INEbase/operacion.htm?c=Estadistica_C&cid=1254736176778&menu=resultados&idp=1254735573175#_tabs-1254736194704
 
 - Ministerio de Sanidad, Gobierno de España. Consumo farmacéutico del SNS: CCAA e INGESA. Portal Estadístico del SNS. https://pestadistico.inteligenciadegestion.sanidad.gob.es/publicoSNS/I/consumo-farmaceutico-del-sns/consumo-farmaceutico-ccaa-e-ingesa
