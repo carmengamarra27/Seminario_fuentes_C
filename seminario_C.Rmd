@@ -1,5 +1,6 @@
 ---
 title: "Biodiversidad e Inmunidad Humana"
+subtitle: "3º IGS - FUENTES DE DATOS BIOMÉDICAS"
 author: "Carmen Gamarra Valenciano, Itsaso Madrigal Román"
 date: "`r Sys.Date()`"
 output:
@@ -10,8 +11,6 @@ output:
     toc: true
     toc_float: true
 ---
-
-Correlación entre la biodiversidad regional española y diversos indicadores de salud en la población local.
 
 
 ## Introducción
@@ -819,7 +818,7 @@ divers_casos
 
 Dibujamos el gráfico con los datos resultantes, con el que podemos estudiar si hay algún sesgo dependiendo del origen de la patología:  
 
-```{r warning=FALSE, grafico_pacientes, fig.width=10, fig.height=6}
+```{r warning=FALSE, grafico_pacientes, fig.width=10, fig.height=5}
 ggplot(divers_casos, aes(x = indice_km2, y = Altas_100mil, fill = Diagnostico_principal)) +
   geom_area(position = "identity") +
   facet_wrap( ~ Diagnostico_principal) +
@@ -833,7 +832,7 @@ Un análisis preliminar sugiere que, para algunas patologías (enfermedades de l
 
 Además, provincias con extensión muy reducida, como Ceuta y Melilla, tienen índices por kilómetro cuadrado excesivamente grandes con respecto al resto de España. Tras su exclusión, es posible observar tendencias más generales.
 
-```{r warning=FALSE, grafico_casos, fig.width=10, fig.height=6}
+```{r warning=FALSE, grafico_casos, fig.width=10, fig.height=5}
 divers_casos <- df_casos %>%
   select(Año, Lugar_hospitalizacion, Diagnostico_principal, Altas_100mil) %>%
   full_join(gbif_tabla, by = c("Lugar_hospitalizacion" = "Provincia", "Año")) %>%
