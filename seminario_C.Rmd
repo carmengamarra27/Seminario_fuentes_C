@@ -1021,6 +1021,8 @@ En resumen, solo ha sido posible establecer una asociación preliminar, débil y
 
 - Haahtela T, Alenius H, Lehtimäki J, Sinkkonen A, Fyhrquist N, Hyöty H, Ruokolainen L, Mäkelä MJ. Immunological resilience and biodiversity for prevention of allergic diseases and asthma. Allergy. 2021 Dec;76(12):3613-3626. doi: 10.1111/all.14895. Epub 2021 May 24. PMID: 33959980. https://pubmed.ncbi.nlm.nih.gov/33959980/
 
+- Comité Científico de la Agencia Española de Seguridad Alimentaria y Nutrición (AESAN), Díaz Perales, A., Aguilera García, C.M., Bretón Lesmes, I., Gil Izquierdo, A., Nieto Martínez, G., Rivas Velasco, A.M., Sánchez Mata, M-C. (2023). Informe del comité científico de la agencia española de seguridad alimentaria y nutrición (AESAN) sobre los efectos del cambio climático en la alergia alimentaria. Revista del Comité Científico de la AESAN, 38, 25-44. 
+
 - Instituto Nacionall de Estadística. Estadística sobre actividades de Investigación y Desarrollo. https://www.ine.es/dyngs/INEbase/operacion.htm?c=Estadistica_C&cid=1254736176778&menu=resultados&idp=1254735573175#_tabs-1254736194704
 
 
