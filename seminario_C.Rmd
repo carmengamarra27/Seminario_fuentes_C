@@ -1,7 +1,7 @@
 ---
 title: "Biodiversidad e Inmunidad Humana"
 author: "Carmen Gamarra Valenciano, Itsaso Madrigal Román"
-date: Sys.Date()
+date: "`r Sys.Date()`"
 output:
   html_document:
     toc: true
@@ -778,7 +778,7 @@ El conjunto de datos disponible permite conocer la variación anual de la riquez
 
 Una representación sencilla para un primer anáilisis es un gráfico de áreas apiladas, que permite observar la evolución de una variable numérica (*n_especies*) de varios grupos a través de los años. Cada provincia se identificará con un color para su mejor distinción.
 
-```{r}
+```{r grafico_especies, fig.width=10, fig.height=6}
 ggplot(gbif_tabla, aes(x = Año, y = n_especies, fill = Provincia)) +
   ggtitle("Evolución de la Biodiversidad en España") +
   geom_area(alpha = 0.5, position = "identity") +
@@ -819,7 +819,7 @@ divers_casos
 
 Dibujamos el gráfico con los datos resultantes, con el que podemos estudiar si hay algún sesgo dependiendo del origen de la patología:  
 
-```{r warning=FALSE}
+```{r warning=FALSE, grafico_pacientes, fig.width=10, fig.height=6}
 ggplot(divers_casos, aes(x = indice_km2, y = Altas_100mil, fill = Diagnostico_principal)) +
   geom_area(position = "identity") +
   facet_wrap( ~ Diagnostico_principal) +
@@ -833,7 +833,7 @@ Un análisis preliminar sugiere que, para algunas patologías (enfermedades de l
 
 Además, provincias con extensión muy reducida, como Ceuta y Melilla, tienen índices por kilómetro cuadrado excesivamente grandes con respecto al resto de España. Tras su exclusión, es posible observar tendencias más generales.
 
-```{r warning=FALSE}
+```{r warning=FALSE, grafico_casos, fig.width=10, fig.height=6}
 divers_casos <- df_casos %>%
   select(Año, Lugar_hospitalizacion, Diagnostico_principal, Altas_100mil) %>%
   full_join(gbif_tabla, by = c("Lugar_hospitalizacion" = "Provincia", "Año")) %>%
@@ -898,7 +898,7 @@ ordenadas <- df_medias %>%
 
 ```
 
-```{r}
+```{r grafico_edad, fig.width=6, fig.height=8}
 # Queremos mantener el orden según el índice de diversidad
 orden <- df_medias %>%
   mutate(Lugar_hospitalizacion = reorder(Lugar_hospitalizacion, Índice_medio)) %>%
@@ -912,7 +912,7 @@ ggplot(orden, aes(x = Lugar_hospitalizacion, y = Pacientes, fill = Grupo_edad)) 
 
 Quitando la excepción que es León, que puede haber sido causada por problemas en el renombrado (detectar *Castilla y León* como *León*), para una observación más clara de las diferencias:
 
-```{r}
+```{r grafico_edades, fig.width=6, fig.height=8}
 orden <- orden %>%
   filter(Lugar_hospitalizacion != "León")
 
